@@ -7,7 +7,13 @@ const UserServices = {
   getUserById(id) {
     return requests.get(`/user/${id}`);
   },
-   updateUserStatus(id, body) {
+  addUser(body) {
+    return requests.post(`/user/add`, body);
+  },
+  updateUser(id, body) {
+    return requests.put(`/user/${id}`, body);
+  },
+  updateUserStatus(id, body) {
     return requests.put(`/user/status/${id}`, body);
   },
   deleteUser(id) {

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -27,9 +27,8 @@ import { SidebarContext } from "../context/SidebarContext";
 
 const Customers = () => {
   const { toggleDrawer } = useContext(SidebarContext);
+  const [editingUserId, setEditingUserId] = useState(null);
   const { data, loading } = useAsync(UserServices.getAllUsers);
-  console.log('Raw data from API:', data);
- 
   const {
     userRef,
     searchUser,
@@ -46,11 +45,21 @@ const Customers = () => {
     setSearchUser("");
   };
 
+  const handleEditUser = (userId) => {
+    setEditingUserId(userId);
+    toggleDrawer();
+  };
+
+  const handleAddUser = () => {
+    setEditingUserId(null);
+    toggleDrawer();
+  };
+
   return (
     <>
       <PageTitle>Vendors</PageTitle>
       <MainDrawer>
-        <UserDrawer />
+        <UserDrawer id={editingUserId} />
       </MainDrawer>
 
       
@@ -78,14 +87,14 @@ const Customers = () => {
 
             <div
               onClick={handleClearFilters}
-              className={` cursor-pointer flex items-center justify-center p-3 rounded-full h-12 w-12 text-center mr-4 text-lg text-blue-600 dark:text-blue-100 bg-blue-100 dark:bg-blue-500`}
+              className={` cursor-pointer flex items-center justify-center p-3 rounded-full h-12 w-12 text-center mr-4 text-lg text-blue-600 dark:blue-100 bg-blue-100 dark:bg-blue-500`}
             >
               <FaFilterCircleXmark />
             </div>
             <div className="w-full md:w-56 lg:w-56 xl:w-56">
               <Button
                 type="button"
-                onClick={toggleDrawer}
+                onClick={handleAddUser}
                 className="w-full rounded-md h-12"
               >
                 <span className="mr-3">
@@ -106,20 +115,18 @@ const Customers = () => {
             <TableHeader>
               <tr>
                 <TableCell>ID</TableCell>
-                <TableCell>Joining Date</TableCell>
+                <TableCell>Image</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
                 <TableCell>Phone</TableCell>
-                {/* <TableCell className="text-center">ROLE</TableCell> */}
-                <TableCell className="text-center">STATUS</TableCell>
-                <TableCell className="text-center">SET STATUS</TableCell>
-                <TableCell className="text-center">ISVERIFIED</TableCell>
-                {/* <TableCell className="text-center">UPDATE VERIFICATION</TableCell> */}
-
-                <TableCell className="text-right">Actions</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Opening Balance</TableCell>
+                <TableCell>NTN</TableCell>
+                <TableCell>STRN</TableCell>
+                <TableCell>Address</TableCell>
+                <TableCell className="text-center">Actions</TableCell>
               </tr>
             </TableHeader>
-            <CustomerTable customers={dataTable} />
+            <CustomerTable customers={dataTable} onEditUser={handleEditUser} />
           </Table>
           <TableFooter>
             <Pagination

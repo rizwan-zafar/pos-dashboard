@@ -6,21 +6,19 @@ import InputArea from "../form/InputArea";
 import LabelArea from "../form/LabelArea";
 import DrawerButton from "../form/DrawerButton";
 import Uploader from "../image-uploader/Uploader";
-import useCategorySubmit from "../../hooks/useCategorySubmit";
+import useUserSubmit from "../../hooks/useUserSubmit";
 import ReactTagInput from "@pathofdev/react-tag-input";
 import { Select, Textarea } from "@windmill/react-ui";
-const UserDrawer = ({ id }) => {
 
+const UserDrawer = ({ id }) => {
   const {
     register,
     handleSubmit,
     onSubmit,
-    errors,
     imageUrl,
     setImageUrl,
-    children,
-    setChildren,
-  } = useCategorySubmit(id);
+    errors,
+  } = useUserSubmit(id);
 
   return (
     <>
@@ -28,24 +26,27 @@ const UserDrawer = ({ id }) => {
         {id ? (
           <Title
             title="Update Vendor"
-            description="Updated your Product category and necessary information from here"
+            description="Update your vendor information and necessary details from here"
           />
         ) : (
           <Title
             title="Add Vendor"
-            description=" Add your Product category and necessary information from here"
+            description="Add your vendor information and necessary details from here"
           />
         )}
       </div>
       <Scrollbars className="w-full md:w-7/12 lg:w-8/12 xl:w-8/12 relative dark:bg-gray-700 dark:text-gray-200">
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="p-6 flex-grow scrollbar-hide w-full max-h-full pb-40">
-            {/* <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
-              <LabelArea label="Category Icon" />
+
+            {/* user image */}
+            <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
+              <LabelArea label="User Image" />
               <div className="col-span-8 sm:col-span-4">
                 <Uploader imageUrl={imageUrl} setImageUrl={setImageUrl} />
               </div>
-            </div> */}
+            </div>
+
 
             {/* user name */}
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
@@ -57,9 +58,9 @@ const UserDrawer = ({ id }) => {
                   name="name"
                   defaultValue=""
                   type="text"
-                  placeholder="Enater name"
+                  placeholder="Enter name"
                 />
-                <Error errorName={errors.type} />
+                <Error errorName={errors.name} />
               </div>
             </div>
 
@@ -72,10 +73,10 @@ const UserDrawer = ({ id }) => {
                   label="Email"
                   name="email"
                   defaultValue=""
-                  type="text"
-                  placeholder="Enater email"
+                  type="email"
+                  placeholder="Enter email"
                 />
-                <Error errorName={errors.type} />
+                <Error errorName={errors.email} />
               </div>
             </div>
 
@@ -85,17 +86,17 @@ const UserDrawer = ({ id }) => {
               <div className="col-span-8 sm:col-span-4">
                 <InputArea
                   register={register}
-                  label="phone"
+                  label="Phone"
                   name="phone"
                   defaultValue=""
                   type="text"
-                  placeholder="Enater email"
+                  placeholder="Enter phone number"
                 />
-                <Error errorName={errors.type} />
+                <Error errorName={errors.phone} />
               </div>
             </div>
 
-            {/* opening balacnce */}
+            {/* opening balance */}
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
               <LabelArea label="Opening Balance" />
               <div className="col-span-8 sm:col-span-4">
@@ -104,10 +105,10 @@ const UserDrawer = ({ id }) => {
                   label="Opening Balance"
                   name="opening_balance"
                   defaultValue=""
-                  type="text"
-                  placeholder="Enater Opening Balance"
+                  type="number"
+                  placeholder="Enter opening balance"
                 />
-                <Error errorName={errors.type} />
+                <Error errorName={errors.opening_balance} />
               </div>
             </div>
 
@@ -121,14 +122,13 @@ const UserDrawer = ({ id }) => {
                   name="ntn"
                   defaultValue=""
                   type="text"
-                  placeholder="Enater NTN"
+                  placeholder="Enter NTN"
                 />
-                <Error errorName={errors.type} />
+                <Error errorName={errors.ntn} />
               </div>
             </div>
 
             {/* user STRN */}
-
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
               <LabelArea label="STRN" />
               <div className="col-span-8 sm:col-span-4">
@@ -138,30 +138,28 @@ const UserDrawer = ({ id }) => {
                   name="strn"
                   defaultValue=""
                   type="text"
-                  placeholder="Enater STRN"
+                  placeholder="Enter STRN"
                 />
-                <Error errorName={errors.type} />
+                <Error errorName={errors.strn} />
               </div>
             </div>
-            {/* user addrss */}
+
+            {/* user address */}
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
               <LabelArea label="Address" />
               <div className="col-span-8 sm:col-span-4">
                 <Textarea
-                  register={register}
-                  label="address"
-                  name="address"
-                  defaultValue=""
-                  type="text"
-                  placeholder="Enater Address"
+                  {...register("address")}
+                  className="w-full px-3 py-3 text-gray-500 bg-transparent border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 dark:text-gray-300 dark:border-gray-600 dark:focus:border-gray-500"
+                  placeholder="Enter address"
+                  rows="4"
                 />
-                <Error errorName={errors.type} />
+                <Error errorName={errors.address} />
               </div>
             </div>
-
           </div>
 
-          <DrawerButton id={id} title="Category" />
+          <DrawerButton id={id} title="Vendor" />
         </form>
       </Scrollbars>
     </>
