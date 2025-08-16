@@ -6,11 +6,13 @@ const OrderServices = {
     const searchStatus = status !== null ? status : '';
     const searchDay = day !== null ? day : '';
 
-    return requests.get( 
-      `/orders?contact=${searchContact}&status=${searchStatus}&day=${searchDay}&page=${page}&limit=${limit}`,
-      body,
-      headers
-    );
+    const url = `/orders?contact=${searchContact}&status=${searchStatus}&day=${searchDay}&page=${page}&limit=${limit}`;
+    
+    // Debug: Log the API call
+    console.log("🔍 OrderServices - getAllOrders URL:", url);
+    console.log("🔍 OrderServices - getAllOrders Parameters:", { contact, status, page, limit, day });
+    
+    return requests.get(url, body, headers);
   },
 
   getRecentOrders({
@@ -52,6 +54,10 @@ const OrderServices = {
 
   deleteOrder(id) {
     return requests.delete(`/orders/${id}`);
+  },
+
+  createOrder(orderData) {
+    return requests.post(`/orders`, orderData);
   },
 };
 

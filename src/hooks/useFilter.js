@@ -9,8 +9,23 @@ import ProductServices from "../services/ProductServices";
 import { notifyError, notifySuccess } from "../utils/toast";
 
 const useFilter = (data) => {
+  // Debug: Log input data
+  console.log("🔍 useFilter - Input data:", {
+    data,
+    dataType: typeof data,
+    isArray: Array.isArray(data),
+    length: data?.length,
+  });
+  
   // Ensure data is always an array to prevent undefined errors
   const safeData = useMemo(() => Array.isArray(data) ? data : [], [data]);
+  
+  // Debug: Log safe data
+  console.log("🔍 useFilter - Safe data:", {
+    safeData,
+    safeDataType: typeof safeData,
+    safeDataLength: safeData?.length,
+  });
   
   const [filter, setFilter] = useState(null);
   const [searchText, setSearchText] = useState("");
@@ -56,6 +71,17 @@ const useFilter = (data) => {
     const date = new Date();
     date.setDate(date.getDate() - time);
     let services = safeData;
+    
+    // Debug logging for orders
+    if (location.pathname === "/orders") {
+      console.log("🔍 useFilter - ORDERS DEBUG START");
+      console.log("🔍 useFilter - safeData (orders):", safeData);
+      console.log("🔍 useFilter - services length (initial):", services?.length);
+      if (services && services.length > 0) {
+        console.log("🔍 useFilter - first order:", services[0]);
+      }
+      console.log("🔍 useFilter - filter state:", { filter, searchText, searchUser, searchCoupon, searchOrder, categoryType, childCategory, adminyType, orderType, reviewType, customerOrderType, subscriptionType, messageType, status, role, time });
+    }
     
     // Debug logging for products
     if (location.pathname === "/products") {
@@ -243,6 +269,16 @@ const useFilter = (data) => {
       services = services.filter((order) =>
         dayjs(order.createdAt).isBetween(date, new Date())
       );
+    }
+
+    // Debug logging for orders - final result
+    if (location.pathname === "/orders") {
+      console.log("🔍 useFilter - ORDERS DEBUG END");
+      console.log("🔍 useFilter - final services length:", services?.length);
+      console.log("🔍 useFilter - final services:", services);
+      if (services && services.length > 0) {
+        console.log("🔍 useFilter - first order in final result:", services[0]);
+      }
     }
 
     return services;

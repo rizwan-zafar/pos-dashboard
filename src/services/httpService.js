@@ -19,6 +19,16 @@ instance.interceptors.request.use(function (config) {
     adminInfo = JSON.parse(Cookies.get('adminInfo'));
   }
 
+  // Debug: Log the request configuration
+  console.log("🔍 httpService - Request Config:", {
+    baseURL: config.baseURL,
+    url: config.url,
+    fullURL: `${config.baseURL}${config.url}`,
+    method: config.method,
+    hasToken: !!adminInfo?.token,
+    headers: config.headers,
+  });
+
   return {
     ...config,
     headers: {
