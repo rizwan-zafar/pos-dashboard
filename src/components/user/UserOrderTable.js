@@ -5,7 +5,7 @@ import { TableCell, TableBody, TableRow } from '@windmill/react-ui';
 import Status from '../table/Status';
 import SelectStatus from '../form/SelectStatus';
 
-const CustomerOrderTable = ({ orders }) => {
+const UserOrderTable = ({ orders }) => {
   return (
     <>
       <TableBody>
@@ -53,4 +53,4 @@ const CustomerOrderTable = ({ orders }) => {
   );
 };
 
-export default CustomerOrderTable;
+export default UserOrderTable;

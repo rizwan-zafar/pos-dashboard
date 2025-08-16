@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TableBody, TableRow, TableCell, Avatar } from "@windmill/react-ui";
+import { TableBody, TableRow, TableCell } from "@windmill/react-ui";
 
 import MainModal from "../modal/MainModal";
 import MainDrawer from "../drawer/MainDrawer";
@@ -50,14 +50,20 @@ const CategoryTable = ({ categories }) => {
               {parent.name}
             </TableCell>
             <TableCell>
-              <Avatar
-                size="large"
-                className="hidden mr-3 md:block bg-gray-50 p-1"
-                src={parent.icon.replace("5055", "4000")}
-                // src={parent.icon}
-                // src='http://localhost:5055/upload/furniture1.webp'
-                alt={parent.parent}
-              />
+              {parent.icon && parent.icon !== "" ? (
+                <img
+                  src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${parent.icon}`}
+                  alt={parent.name}
+                  className="w-10 h-10 rounded object-cover mr-3"
+                  crossOrigin="anonymous"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center mr-3">
+                  <span className="text-gray-500 text-sm font-semibold">
+                    {parent?.name?.charAt(0)?.toUpperCase() || "C"}
+                  </span>
+                </div>
+              )}
             </TableCell>
 
             <TableCell className="font-medium text-sm">

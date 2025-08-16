@@ -9,13 +9,16 @@ import ProductServices from "../services/ProductServices";
 import { notifyError, notifySuccess } from "../utils/toast";
 
 const useFilter = (data) => {
+  // Ensure data is always an array to prevent undefined errors
+  const safeData = useMemo(() => Array.isArray(data) ? data : [], [data]);
+  
   const [filter, setFilter] = useState(null);
-  const [sortedField, setSortedField] = useState("");
   const [searchText, setSearchText] = useState("");
   const [searchUser, setSearchUser] = useState("");
   const [searchCoupon, setSearchCoupon] = useState("");
   const [searchOrder, setSearchOrder] = useState("");
-  const [categoryType, setCategoryType] = useState("");
+  const [categoryType, setCategoryType] = useState("All");
+  const [childCategory, setChildCategory] = useState("");
   const [adminyType, setAdminType] = useState("");
   const [orderType, setOrderType] = useState("");
   const [reviewType, setReviewType] = useState("");
@@ -52,7 +55,21 @@ const useFilter = (data) => {
   const serviceData = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() - time);
-    let services = data;
+    let services = safeData;
+    
+    // Debug logging for products
+    if (location.pathname === "/products") {
+      console.log("useFilter - safeData:", safeData);
+      console.log("useFilter - services length:", services?.length);
+      if (services && services.length > 0) {
+        console.log("useFilter - first product:", services[0]);
+      }
+      console.log("useFilter - categoryType:", categoryType);
+      console.log("useFilter - childCategory:", childCategory);
+      console.log("useFilter - searchText:", searchText);
+      console.log("useFilter - final services length:", services?.length);
+    }
+    
     // console.log("----------- ",services);
     if (location.pathname === "/dashboard") {
       const orderPending = services?.filter(
@@ -102,27 +119,43 @@ const useFilter = (data) => {
       services = services.filter((item) => item.parent || item.name === filter);
     }
 
-    if (sortedField === "Low") {
-      services = services.sort((a, b) => a.price < b.price && -1);
-    }
-    if (sortedField === "High") {
-      services = services.sort((a, b) => a.price > b.price && -1);
+    // Product-specific filtering
+    if (location.pathname === "/products") {
+      // Category filtering
+      if (categoryType && categoryType !== "All") {
+        services = services.filter((product) => 
+          product && product.category && product.category.toLowerCase() === categoryType.toLowerCase()
+        );
+      }
+
+      // Child category filtering
+      if (childCategory) {
+        services = services.filter((product) => 
+          product && product.childCategory && product.childCategory.toLowerCase() === childCategory.toLowerCase()
+        );
+      }
+
+      // Product search
+      if (searchText) {
+        services = services.filter((product) => 
+          product && (
+            (product.title && product.title.toLowerCase().includes(searchText.toLowerCase())) ||
+            (product.productCode && product.productCode.toLowerCase().includes(searchText.toLowerCase())) ||
+            (product.name && product.name.toLowerCase().includes(searchText.toLowerCase()))
+          )
+        );
+      }
     }
 
-    if (searchText) {
-      services = services.filter((search) => 
-        search.title.toLowerCase().includes(searchText?.toLowerCase()) ||
-        search.productCode.toLowerCase().includes(searchText?.toLowerCase())
-      );
-    }
 
-    //category searching
-    if (categoryType) {
+
+    //category searching (only for non-products)
+    if (categoryType && categoryType !== "All" && location.pathname !== "/products") {
       services = services.filter((search) =>
-        // search.type.toLowerCase().includes(categoryType.toLowerCase())
-        search.name.toLowerCase().includes(categoryType.toLowerCase())
+        search.name?.toLowerCase().includes(categoryType.toLowerCase())
       );
     }
+
     if (adminyType) {
       services = services.filter((search) =>
           search.name.toLowerCase().includes(adminyType.toLowerCase()) ||
@@ -215,13 +248,12 @@ const useFilter = (data) => {
     return services;
   }, [
     filter,
-    sortedField,
-    data,
     searchText,
     searchUser,
     searchCoupon,
     searchOrder,
     categoryType,
+    childCategory,
     adminyType,
     orderType,
     reviewType,
@@ -347,17 +379,19 @@ const useFilter = (data) => {
     totalOrder,
     searchUser,
     searchOrder,
+    role,
+    setRole,
     setFilter,
-    setSortedField,
     setStatus,
     categoryType,
+    childCategory,
+    setChildCategory,
     adminyType,
     orderType,
     reviewType,
     customerOrderType,
     subscriptionType,
     messageType,
-    setRole,
     setTime,
     handleChangePage,
     totalResults,

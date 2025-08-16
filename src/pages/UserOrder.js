@@ -17,10 +17,10 @@ import useAsync from "../hooks/useAsync";
 import useFilter from "../hooks/useFilter";
 import OrderServices from "../services/OrderServices";
 import Loading from "../components/preloader/Loading";
+import UserOrderTable from "../components/user/UserOrderTable";
 import PageTitle from "../components/Typography/PageTitle";
-import CustomerOrderTable from "../components/customer/CustomerOrderTable";
 
-const CustomerOrder = () => {
+const UserOrder = () => {
   const { id } = useParams();
 
   const { data, loading, error } = useAsync(() =>
@@ -33,7 +33,6 @@ const CustomerOrder = () => {
     customerOrderType,
     setCustomerOrderType,
     handleSubmitCustomerOrder,
-
     handleChangePage,
     totalResults,
     resultsPerPage,
@@ -42,7 +41,7 @@ const CustomerOrder = () => {
 
   return (
     <>
-      <PageTitle>Customer Order List</PageTitle>
+      <PageTitle>User Order List</PageTitle>
 
       {loading && <Loading loading={loading} />}
       {!error && !loading && dataTable.length === 0 && (
@@ -52,7 +51,7 @@ const CustomerOrder = () => {
               <IoBagHandle />
             </span>
             <h2 className="font-medium text-base mt-4 text-gray-600">
-              This Customer have no order Yet!
+              This User have no order Yet!
             </h2>
           </div>
         </div>
@@ -99,7 +98,7 @@ const CustomerOrder = () => {
                 <TableCell className="text-center">Actions</TableCell>
               </tr>
             </TableHeader>
-            <CustomerOrderTable orders={dataTable} />
+            <UserOrderTable orders={dataTable} />
           </Table>
           <TableFooter>
             <Pagination
@@ -115,4 +114,4 @@ const CustomerOrder = () => {
   );
 };
 
-export default CustomerOrder;
+export default UserOrder;

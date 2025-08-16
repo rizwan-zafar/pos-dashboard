@@ -5,7 +5,6 @@ import {
   TableBody,
   TableRow,
   // Badge,
-  Avatar,
 } from "@windmill/react-ui";
 import { FiMessageCircle, FiZoomIn } from "react-icons/fi";
 
@@ -59,19 +58,25 @@ const ProductTable = ({ products }) => {
             <TableCell>
               <div className="flex items-center">
                 {product.image && product.image !== "" ? (
-                  <Avatar
-                    size="large"
-                    className="hidden  mr-2 md:block bg-gray-50 shadow-none"
-                    src={product.image}
+                  <img
+                    src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${product.image}`}
                     alt={product.title}
+                    className="w-10 h-10 rounded object-cover mr-2"
+                    crossOrigin="anonymous"
+                  />
+                ) : product.gallery && product.gallery !== "[]" ? (
+                  <img
+                    src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${JSON.parse(product.gallery)[0]}`}
+                    alt={product.title}
+                    className="w-10 h-10 rounded object-cover mr-2"
+                    crossOrigin="anonymous"
                   />
                 ) : (
-                  <Avatar
-                    size="large"
-                    className="hidden  mr-2 md:block bg-gray-50 shadow-none"
-                    src={JSON.parse(product.gallery)[0]}
-                    alt={product.title}
-                  />
+                  <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center mr-2">
+                    <span className="text-gray-500 text-sm font-semibold">
+                      {product?.title?.charAt(0)?.toUpperCase() || "P"}
+                    </span>
+                  </div>
                 )}
               </div>
             </TableCell>

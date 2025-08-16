@@ -1,7 +1,7 @@
 import React from "react";
 import { Input } from "@windmill/react-ui";
 
-const InputValue = ({ register,required, maxValue, minValue, defaultValue, name, label, type, placeholder , disable }) => {
+const InputValue = React.forwardRef(({ register, required, maxValue, minValue, defaultValue, name, label, type, placeholder, disable }, ref) => {
   const value = {
     valueAsNumber: true,
     required: required ? false : `${label} is required!`,
@@ -17,6 +17,7 @@ const InputValue = ({ register,required, maxValue, minValue, defaultValue, name,
   return (
     <>
       <Input
+        ref={ref}
         {...register(`${name}`, value)}
         defaultValue={defaultValue}
         type={type}
@@ -29,7 +30,7 @@ const InputValue = ({ register,required, maxValue, minValue, defaultValue, name,
       {/* <Input
   {...register(`${name}`, value)}
   defaultValue={defaultValue}
-  type={type}
+  type="number"
   placeholder={placeholder}
   name={name}
   min={1}
@@ -43,6 +44,8 @@ const InputValue = ({ register,required, maxValue, minValue, defaultValue, name,
 
     </>
   );
-};
+});
+
+InputValue.displayName = 'InputValue';
 
 export default InputValue;

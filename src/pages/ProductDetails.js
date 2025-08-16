@@ -1,4 +1,4 @@
-import { Badge } from "@windmill/react-ui";
+ import { Badge } from "@windmill/react-ui";
 import React, { useEffect, useState } from "react";
 import { useParams, useHistory } from "react-router";
 
@@ -103,22 +103,22 @@ const ProductDetails = () => {
                     {data?.image && data.image !== "" ? (
                       <div className="flex justify-center">
                         <img
-                          src={data.image.replace("5055", "4000")}
+                  src={data.image.replace("5055", "4000")}
                           alt={data?.title}
                           className="w-full max-w-48 h-auto rounded-lg object-contain"
-                        />
+                />
                       </div>
-                    ) : (
+              ) : (
                       <div className="grid grid-cols-2 gap-2">
                         {JSON.parse(data?.gallery || '[]').map((file, i) => (
-                          <img
-                            key={i}
-                            src={file.replace("5055", "4000")}
+                      <img
+                        key={i}
+                        src={file.replace("5055", "4000")}
                             alt={`${data?.title} - Image ${i + 1}`}
                             className="w-full h-auto max-h-24 rounded-lg object-contain"
-                          />
-                        ))}
-                      </div>
+                      />
+                    ))}
+            </div>
                     )}
                   </div>
                 </div>
@@ -148,7 +148,7 @@ const ProductDetails = () => {
                             <span className="text-xl text-gray-500 line-through">
                               Rs {variations && variations.length > 0 
                                 ? lowestPriceVariation?.price 
-                                : data?.price
+                          : data?.price
                               }
                             </span>
                           )}
@@ -167,8 +167,8 @@ const ProductDetails = () => {
                             }
                           </p>
                         </div>
-                      )}
-                      
+                    )}
+
                       {/* Delivery Information */}
                       <div className="mb-4">
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Delivery</p>
@@ -179,8 +179,8 @@ const ProductDetails = () => {
                         ) : (
                           <p className="text-lg font-semibold text-green-600">Free Delivery</p>
                         )}
-                      </div>
-                      
+              </div>
+
                       {/* Savings */}
                       {((variations && variations.length > 0 && lowestPriceVariation?.promo_price_pkr > 0) ||
                         (!lowestPriceVariation && data?.promo_price_pkr > 0)) && (
@@ -230,7 +230,7 @@ const ProductDetails = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -270,7 +270,7 @@ const ProductDetails = () => {
                               {variation.promo_price_pkr && (
                                 <span className="text-sm text-gray-500 line-through">
                                   Rs {variation.price}
-                                </span>
+                    </span>
                               )}
                             </div>
                           </td>

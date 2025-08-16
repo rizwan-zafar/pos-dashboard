@@ -1,30 +1,26 @@
 import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
-import * as dayjs from "dayjs";
 import { TableCell, TableBody, TableRow, Modal, ModalHeader, ModalBody, ModalFooter, Button } from "@windmill/react-ui";
 import { FiZoomIn, FiTrash2, FiEdit } from "react-icons/fi";
 
 import Tooltip from "../tooltip/Tooltip";
 import MainModal from "../modal/MainModal";
 import { SidebarContext } from "../../context/SidebarContext";
-import SelectStatus from "../form/SelectStatus";
-import Status from "../table/Status";
 
-const CustomerTable = ({ customers, onEditUser }) => {
-  const [customerId, setCustomerId] = useState("");
+const UserTable = ({ customers, onEditUser }) => {
+  const [userId, setUserId] = useState("");
   const [addressModal, setAddressModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedUserName, setSelectedUserName] = useState("");
-  const { toggleModal, toggleDrawer } = useContext(SidebarContext);
+  const { toggleModal } = useContext(SidebarContext);
   const [title, setTitle] = useState("");
 
   const handleModalOpen = (id, title) => {
-    setCustomerId(id);
+    setUserId(id);
     toggleModal();
     setTitle(title);
   };
 
-  const handleEdit = (id) => { 
+  const handleEdit = (id) => {
     onEditUser(id);
   };
 
@@ -34,25 +30,28 @@ const CustomerTable = ({ customers, onEditUser }) => {
     setAddressModal(true);
   };
 
-  console.log("image upload url",process.env.REACT_APP_IMAGE_UPLOAD_URL)
+  // Get the selected user object for modal display
+  const selectedUser = customers?.find(u => u.name === selectedUserName);
+
   return (
     <>
-      <MainModal id={customerId} title={title} />
+      <MainModal id={userId} title={title} />
       <TableBody>
         {customers?.map((user) => (
           <TableRow key={user?.id}>
             <TableCell>
               <span className="font-semibold uppercase text-xs">
                 {user?.id}
-              </span> 
+              </span>
             </TableCell>
             <TableCell>
               <div className="flex items-center">
                 {user?.image ? (
                   <img
-                    src={user.image.startsWith('http') ? user.image : `${process.env.REACT_APP_IMAGE_UPLOAD_URL}${user.image}`}
+                    src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${user.image}`}
                     alt={user.name}
                     className="w-10 h-10 rounded-full object-cover"
+                    crossOrigin="anonymous"
                   />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
@@ -64,7 +63,14 @@ const CustomerTable = ({ customers, onEditUser }) => {
               </div>
             </TableCell>
             <TableCell>
-              <span className="text-sm font-medium">{user.name}</span>
+              <span className="text-sm font-medium">
+              {user.name.charAt(0).toUpperCase() + user.name.slice(1)}
+              </span>
+            </TableCell>
+            <TableCell>
+              <span className="text-sm">
+                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              </span>
             </TableCell>
             <TableCell>
               <span className="text-sm">{user.phone}</span>
@@ -85,13 +91,13 @@ const CustomerTable = ({ customers, onEditUser }) => {
             </TableCell>
             <TableCell>
               <div className="max-w-xs">
-                <span 
-                  className="text-sm cursor-help" 
+                <span
+                  className="text-sm cursor-help"
                   title={user.address || "N/A"}
                 >
                   {user.address ? (
-                    user.address.length > 20 ? 
-                      `${user.address.substring(0, 20)}...` : 
+                    user.address.length > 20 ?
+                      `${user.address.substring(0, 20)}...` :
                       user.address
                   ) : "N/A"}
                 </span>
@@ -142,7 +148,7 @@ const CustomerTable = ({ customers, onEditUser }) => {
       <Modal isOpen={addressModal} onClose={() => setAddressModal(false)}>
         <ModalHeader>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Vendor Details
+            {selectedUser?.role === 'vendor' ? 'Vendor Details' : 'Customer Details'}
           </h3>
         </ModalHeader>
         <ModalBody>
@@ -151,9 +157,9 @@ const CustomerTable = ({ customers, onEditUser }) => {
             <div className="md:hidden">
               <div className="flex flex-col items-center mb-6">
                 <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center mb-4">
-                  {customers?.find(u => u.name === selectedUserName)?.image ? (
+                  {selectedUser?.image ? (
                     <img
-                      src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL || 'http://localhost:5055/upload/'}${customers?.find(u => u.name === selectedUserName)?.image}`}
+                      src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL || 'http://localhost:5055/upload/'}${selectedUser.image}`}
                       alt={selectedUserName}
                       className="w-full h-full object-cover"
                     />
@@ -167,37 +173,43 @@ const CustomerTable = ({ customers, onEditUser }) => {
                   {selectedUserName}
                 </h4>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-3">
                   <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Role</p>
+                    <p className="text-gray-900 dark:text-white font-medium capitalize">
+                      {selectedUser?.role || "N/A"}
+                    </p>
+                  </div>
+                  <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                     <p className="text-gray-900 dark:text-white font-medium">
-                      {customers?.find(u => u.name === selectedUserName)?.email || "N/A"}
+                      {selectedUser?.email || "N/A"}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
                     <p className="text-gray-900 dark:text-white font-medium">
-                      {customers?.find(u => u.name === selectedUserName)?.phone || "N/A"}
+                      {selectedUser?.phone || "N/A"}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Opening Balance</p>
                     <p className="text-gray-900 dark:text-white font-medium">
-                      Rs {customers?.find(u => u.name === selectedUserName)?.opening_balance || 0}
+                      Rs {selectedUser?.opening_balance || 0}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">NTN</p>
                     <p className="text-gray-900 dark:text-white font-medium">
-                      {customers?.find(u => u.name === selectedUserName)?.ntn || "N/A"}
+                      {selectedUser?.ntn || "N/A"}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">STRN</p>
                     <p className="text-gray-900 dark:text-white font-medium">
-                      {customers?.find(u => u.name === selectedUserName)?.strn || "N/A"}
+                      {selectedUser?.strn || "N/A"}
                     </p>
                   </div>
                 </div>
@@ -209,9 +221,9 @@ const CustomerTable = ({ customers, onEditUser }) => {
               <div className="flex items-start space-x-6">
                 <div className="flex-shrink-0">
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                    {customers?.find(u => u.name === selectedUserName)?.image ? (
+                    {selectedUser?.image ? (
                       <img
-                        src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL || 'http://localhost:5055/upload/'}${customers?.find(u => u.name === selectedUserName)?.image}`}
+                        src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL || 'http://localhost:5055/upload/'}${selectedUser.image}`}
                         alt={selectedUserName}
                         className="w-full h-full object-cover"
                       />
@@ -222,40 +234,46 @@ const CustomerTable = ({ customers, onEditUser }) => {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex-1">
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     {selectedUserName}
                   </h4>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                     <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Role</p>
+                      <p className="text-gray-900 dark:text-white font-medium capitalize">
+                        {selectedUser?.role || "N/A"}
+                      </p>
+                    </div>
+                    <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                       <p className="text-gray-900 dark:text-white font-medium">
-                        {customers?.find(u => u.name === selectedUserName)?.email || "N/A"}
+                        {selectedUser?.email || "N/A"}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
                       <p className="text-gray-900 dark:text-white font-medium">
-                        {customers?.find(u => u.name === selectedUserName)?.phone || "N/A"}
+                        {selectedUser?.phone || "N/A"}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Opening Balance</p>
                       <p className="text-gray-900 dark:text-white font-medium">
-                        Rs {customers?.find(u => u.name === selectedUserName)?.opening_balance || 0}
+                        Rs {selectedUser?.opening_balance || 0}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">NTN</p>
                       <p className="text-gray-900 dark:text-white font-medium">
-                        {customers?.find(u => u.name === selectedUserName)?.ntn || "N/A"}
+                        {selectedUser?.ntn || "N/A"}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">STRN</p>
                       <p className="text-gray-900 dark:text-white font-medium">
-                        {customers?.find(u => u.name === selectedUserName)?.strn || "N/A"}
+                        {selectedUser?.strn || "N/A"}
                       </p>
                     </div>
                   </div>
@@ -285,4 +303,4 @@ const CustomerTable = ({ customers, onEditUser }) => {
   );
 };
 
-export default CustomerTable;
+export default UserTable;

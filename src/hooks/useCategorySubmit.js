@@ -23,9 +23,15 @@ const useCategorySubmit = (id) => {
       notifyError("Icon is required!");
       return;
     }
+    
+    // Extract filename from full URL if it's a full URL
+    const iconFilename = imageUrl.includes(process.env.REACT_APP_IMAGE_UPLOAD_URL) 
+      ? imageUrl.replace(process.env.REACT_APP_IMAGE_UPLOAD_URL, '') 
+      : imageUrl;
+    
     const categoryData = {
       name: name,
-      icon: imageUrl,
+      icon: iconFilename,
       children: children,
     };
 
@@ -70,7 +76,9 @@ const useCategorySubmit = (id) => {
             setValue("name", res.name);
             setChildren(JSON.parse(res.children));
             setValue("icon", res.icon);
-            setImageUrl(res.icon);
+            // Construct full image URL for display in edit form
+            const fullImageUrl = res.icon ? `${process.env.REACT_APP_IMAGE_UPLOAD_URL}${res.icon}` : "";
+            setImageUrl(fullImageUrl);
           }
         })
         .catch((err) => {

@@ -23,26 +23,23 @@ const sidebar = [
     name: "Dashboard", // name that appear in Sidebar
   },
   // {
-  //   icon: FiSettings,
   //   name: "Customer",
-  //   routes: [
-  //     // submenu
-
+  //   icon: "https://cdn.tuk.dev/assets/templates/olympus/projects.png",
+  //   children: [
   //     {
+  //       name: "User",
   //       path: "/customer/user",
-  //       name: "User ",
   //     },
   //     {
+  //       name: "Subscriptions",
   //       path: "/customer/subscriptions",
-  //       name: "Subscription",
   //     },
   //   ],
   // },
-
   {
+    name: "User",
+    icon: "https://cdn.tuk.dev/assets/templates/olympus/projects.png",
     path: "/customer/user",
-    icon: FiGrid,
-    name: "Vendors",
   },
   {
     path: "/category",

@@ -1,13 +1,15 @@
 import requests from './httpService';
 
 const ProductServices = {
-  getAllProducts({ page, limit, category, title, price }) {
-    const searchCategory = category !== null ? category : '';
-    const searchTitle = title !== null ? title : '';
-    const searchPrice = price !== null ? price : '';
+  getAllProducts(params = {}) {
+    const { category, childCategory, title, price } = params;
+    const searchCategory = category !== null && category !== undefined ? category : '';
+    const searchChildCategory = childCategory !== null && childCategory !== undefined ? childCategory : '';
+    const searchTitle = title !== null && title !== undefined ? title : '';
+    const searchPrice = price !== null && price !== undefined ? price : '';
 
     return requests.get(
-       `/products?isDashboard=true&all=true&category=${searchCategory}&title=${searchTitle}&price=${searchPrice}`
+       `/products?isDashboard=true&all=true&category=${searchCategory}&childCategory=${searchChildCategory}&title=${searchTitle}&price=${searchPrice}`
     );
   },
 

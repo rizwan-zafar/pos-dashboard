@@ -309,12 +309,12 @@ const ProductDrawer = ({ id }) => {
               <div className="col-span-8 sm:col-span-4">
                 <Select className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white" name="user_id" {...register("user_id", {
                   required: "Select Vendor",
-                })}>
+                })} value={watch("user_id") || ""}>
                   <option value="" hidden>
                     Select Vendor
                   </option>
                   {
-                    allUsers?.map((user) => (
+                    allUsers?.filter(user => user.role === 'vendor')?.map((user) => (
                       <option key={
                         `${user.id
                         }`

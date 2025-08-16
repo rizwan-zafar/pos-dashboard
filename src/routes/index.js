@@ -1,11 +1,12 @@
 import { lazy } from 'react';
-import Faq from '../pages/Faq';
-import Customers from '../pages/Customers';
-import CustomerOrder from '../pages/CustomerOrder';
+import Users from '../pages/Users';
+import UserOrder from '../pages/UserOrder';
 import Subscriptions from '../pages/Subscriptions';
 import Staff from '../pages/Staff';
 import Messages from '../pages/Messages';
 import VideoBanner from '../pages/VideoBanner';
+import Faq from '../pages/Faq';
+
 // use lazy for better code splitting
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const Products = lazy(() => import('../pages/Products'));
@@ -14,19 +15,11 @@ const Banner = lazy(() => import('../pages/Banner'));
 const AppPromotion = lazy(() => import('../pages/AppPromotion'));
 const ProductDetails = lazy(() => import('../pages/ProductDetails'));
 const Category = lazy(() => import('../pages/Category'));
-// const Staff = lazy(() => import('../pages/Staff'));
-// const Customers = lazy(() => import('../pages/Customers'));
-// const CustomerOrder = lazy(() => import('../pages/CustomerOrder'));
 const FaqDetails = lazy(() => import('../pages/FaqDetails'));
 const Orders = lazy(() => import('../pages/Orders'));
 const OrderInvoice = lazy(() => import('../pages/OrderInvoice'));
 const ProductInvoice = lazy(() => import('../pages/ProductInvoice'));
 const BannerDetails = lazy(() => import('../pages/BannerDetails'));
-// const Coupons = lazy(() => import('../pages/Coupons'));
-// const Setting = lazy(() => import("../pages/Setting"));
-// const Page404 = lazy(() => import('../pages/404'));
-// const ComingSoon = lazy(() => import('../pages/ComingSoon'));
-// const EditProfile = lazy(() => import('../pages/EditProfile'));
 
 /*
 //  * ⚠ These are internal routes!
@@ -90,11 +83,11 @@ const routes = [
   },
   {
    path: '/customer/user',
-    component: Customers,
+    component: Users,
   },
   {
    path: '/customer-order/:id',
-    component: CustomerOrder,
+    component: UserOrder,
   },
   {
    path: '/customer/subscriptions',

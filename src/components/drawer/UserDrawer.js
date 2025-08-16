@@ -1,14 +1,11 @@
-// import React, { useEffect, useState } from "react";
 import { Scrollbars } from "react-custom-scrollbars-2";
 import Error from "../form/Error";
 import Title from "../form/Title";
-import InputArea from "../form/InputArea";
 import LabelArea from "../form/LabelArea";
 import DrawerButton from "../form/DrawerButton";
 import Uploader from "../image-uploader/Uploader";
 import useUserSubmit from "../../hooks/useUserSubmit";
-import ReactTagInput from "@pathofdev/react-tag-input";
-import { Select, Textarea } from "@windmill/react-ui";
+import { Select, Textarea, Input } from "@windmill/react-ui";
 
 const UserDrawer = ({ id }) => {
   const {
@@ -25,13 +22,13 @@ const UserDrawer = ({ id }) => {
       <div className="w-full relative p-6  border-b border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
         {id ? (
           <Title
-            title="Update Vendor"
-            description="Update your vendor information and necessary details from here"
+            title="Update User"
+            description="Update your user information and necessary details from here"
           />
         ) : (
           <Title
-            title="Add Vendor"
-            description="Add your vendor information and necessary details from here"
+            title="Add User"
+            description="Add your user information and necessary details from here"
           />
         )}
       </div>
@@ -52,15 +49,33 @@ const UserDrawer = ({ id }) => {
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
               <LabelArea label="Name" />
               <div className="col-span-8 sm:col-span-4">
-                <InputArea
-                  register={register}
-                  label="Name"
+                <Input
                   name="name"
                   defaultValue=""
                   type="text"
                   placeholder="Enter name"
+                  className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white"
+                  {...register("name", { required: "Name is required!" })}
                 />
                 <Error errorName={errors.name} />
+              </div>
+            </div>
+
+            {/* user role */}
+           
+            <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
+              <LabelArea label="Role" />
+              <div className="col-span-8 sm:col-span-4">
+                <Select className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white" name="role" {...register("role", {
+                  required: "Select User Role!",
+                })}>
+                  <option value="" hidden>
+                    Select Role
+                  </option>
+                  <option value="vendor">Vendor</option>
+                  <option value="customer">Customer</option>
+                </Select>
+                <Error errorName={errors.role} />
               </div>
             </div>
 
@@ -68,13 +83,19 @@ const UserDrawer = ({ id }) => {
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
               <LabelArea label="Email" />
               <div className="col-span-8 sm:col-span-4">
-                <InputArea
-                  register={register}
-                  label="Email"
+                <Input
                   name="email"
                   defaultValue=""
                   type="email"
                   placeholder="Enter email"
+                  className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white"
+                  {...register("email", { 
+                    required: "Email is required!",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address"
+                    }
+                  })}
                 />
                 <Error errorName={errors.email} />
               </div>
@@ -84,13 +105,13 @@ const UserDrawer = ({ id }) => {
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
               <LabelArea label="Phone" />
               <div className="col-span-8 sm:col-span-4">
-                <InputArea
-                  register={register}
-                  label="Phone"
+                <Input
                   name="phone"
                   defaultValue=""
                   type="text"
                   placeholder="Enter phone number"
+                  className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white"
+                  {...register("phone", { required: "Phone number is required!" })}
                 />
                 <Error errorName={errors.phone} />
               </div>
@@ -100,13 +121,13 @@ const UserDrawer = ({ id }) => {
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
               <LabelArea label="Opening Balance" />
               <div className="col-span-8 sm:col-span-4">
-                <InputArea
-                  register={register}
-                  label="Opening Balance"
+                <Input
                   name="opening_balance"
                   defaultValue=""
                   type="number"
                   placeholder="Enter opening balance"
+                  className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white"
+                  {...register("opening_balance", { required: "Opening balance is required!" })}
                 />
                 <Error errorName={errors.opening_balance} />
               </div>
@@ -114,33 +135,31 @@ const UserDrawer = ({ id }) => {
 
             {/* User NTN */}
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
-              <LabelArea label="NTN" />
+              <LabelArea label="NTN (Optional)" />
               <div className="col-span-8 sm:col-span-4">
-                <InputArea
-                  register={register}
-                  label="NTN"
+                <Input
                   name="ntn"
                   defaultValue=""
                   type="text"
-                  placeholder="Enter NTN"
+                  placeholder="Enter NTN (optional)"
+                  className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white"
+                  {...register("ntn")}
                 />
-                <Error errorName={errors.ntn} />
               </div>
             </div>
 
             {/* user STRN */}
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
-              <LabelArea label="STRN" />
+              <LabelArea label="STRN (Optional)" />
               <div className="col-span-8 sm:col-span-4">
-                <InputArea
-                  register={register}
-                  label="STRN"
+                <Input
                   name="strn"
                   defaultValue=""
                   type="text"
-                  placeholder="Enter STRN"
-                />
-                <Error errorName={errors.strn} />
+                  placeholder="Enter STRN (optional)"
+                  className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white"
+                  {...register("strn")}
+                /> 
               </div>
             </div>
 
@@ -149,7 +168,7 @@ const UserDrawer = ({ id }) => {
               <LabelArea label="Address" />
               <div className="col-span-8 sm:col-span-4">
                 <Textarea
-                  {...register("address")}
+                  {...register("address", { required: "Address is required!" })}
                   className="w-full px-3 py-3 text-gray-500 bg-transparent border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 dark:text-gray-300 dark:border-gray-600 dark:focus:border-gray-500"
                   placeholder="Enter address"
                   rows="4"
@@ -159,7 +178,7 @@ const UserDrawer = ({ id }) => {
             </div>
           </div>
 
-          <DrawerButton id={id} title="Vendor" />
+          <DrawerButton id={id} title="User" />
         </form>
       </Scrollbars>
     </>

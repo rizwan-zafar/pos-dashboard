@@ -14,7 +14,6 @@ import {
 import { FiPlus } from "react-icons/fi";
 
 import useAsync from "../hooks/useAsync";
-import useFilter from "../hooks/useFilter";
 import NotFound from "../components/table/NotFound";
 import Loading from "../components/preloader/Loading";
 import { SidebarContext } from "../context/SidebarContext";
@@ -28,22 +27,51 @@ import { FaFilterCircleXmark } from "react-icons/fa6";
 const Category = () => {
   const { toggleDrawer } = useContext(SidebarContext);
   const { data, loading } = useAsync(CategoryServices.getAllCategory);
-  const {
-    categoryRef,
-    setFilter,
-    handleChangePage,
-    totalResults,
-    resultsPerPage,
-    dataTable,
-    serviceData,
-    categoryType,
-    setCategoryType,
-    handleSubmitCategory,
-  } = useFilter(data);
+  
+  // Use separate search state instead of categoryType for the search input
+  const [searchText, setSearchText] = React.useState("");
+  
+  // Extract categories array from the API response
+  const categories = React.useMemo(() => {
+    if (data?.categories) return data.categories;
+    if (Array.isArray(data)) return data;
+    return [];
+  }, [data]);
+
+  // Use local state for filtering and pagination
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const resultsPerPage = 8;
+
+  // Filter categories based on search text
+  const filteredCategories = React.useMemo(() => {
+    if (!searchText) return categories;
+    
+    return categories.filter(category => 
+      category.name?.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [categories, searchText]);
+
+  // Pagination
+  const totalResults = filteredCategories.length;
+  const dataTable = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * resultsPerPage;
+    const endIndex = startIndex + resultsPerPage;
+    return filteredCategories.slice(startIndex, endIndex);
+  }, [filteredCategories, currentPage, resultsPerPage]);
+
+  const handleChangePage = (p) => {
+    setCurrentPage(p);
+  };
 
   const handleClearFilters = () => {
-    setCategoryType("");
-    setFilter("");
+    setSearchText("");
+    setCurrentPage(1);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // Search is handled by the filteredCategories useMemo
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   return (
@@ -57,14 +85,13 @@ const Category = () => {
       <Card className="min-w-0 shadow-xs overflow-hidden bg-white dark:bg-gray-800 mb-5">
         <CardBody>
           <form
-            onSubmit={handleSubmitCategory}
+            onSubmit={handleSearch}
             className="py-3 grid gap-4 lg:gap-6 xl:gap-6 md:flex xl:flex"
           >
             <div className="flex-grow-0 md:flex-grow lg:flex-grow xl:flex-grow">
               <Input
-                ref={categoryRef}
-                value={categoryType}
-                onChange={(e) => setCategoryType(e.target.value)}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
                 className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 border-transparent focus:bg-white"
                 type="search"
                 name="search"
@@ -100,7 +127,7 @@ const Category = () => {
 
       {loading ? (
         <Loading loading={loading} />
-      ) : serviceData.length !== 0 ? (
+      ) : totalResults !== 0 ? (
         <TableContainer className="mb-8">
           <Table>
             <TableHeader>
