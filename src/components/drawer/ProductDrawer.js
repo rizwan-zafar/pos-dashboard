@@ -18,6 +18,16 @@ import ProductImgUploader from "../image-uploader/ProductImgUploader";
 import { FiX } from "react-icons/fi";
 import { FiTrash2 } from "react-icons/fi";
 
+// Utility function to get current time in Pakistan timezone
+const getPakistanTime = () => {
+  const now = new Date();
+  // Pakistan is UTC+5, but we need to account for daylight saving time
+  // For now, we'll use a fixed offset. You can adjust this if needed
+  const pakistanOffset = 5 * 60 * 60 * 1000; // 5 hours in milliseconds
+  const pakistanTime = new Date(now.getTime() + pakistanOffset);
+  return pakistanTime.toISOString().slice(0, 19).replace('T', ' ');
+};
+
 const ProductDrawer = ({ id }) => {
   const {
     register,
@@ -46,18 +56,23 @@ const ProductDrawer = ({ id }) => {
   }, [isDrawerOpen, productCode, id, setValue]);
 
   const addVariation = () => {
+    const currentDateTime = getPakistanTime();
     setVariations([
       ...variations, {
         size: "",
         price: "",
-        promo_price_pkr: ""
+        promo_price_pkr: "",
+        stock: "",
+        updated_at: currentDateTime
       },
     ]);
   };
 
   const updateVariation = (index, field, value) => {
+    const currentDateTime = getPakistanTime();
     const updatedVariations = [...variations];
     updatedVariations[index][field] = value;
+    updatedVariations[index].updated_at = currentDateTime;
     setVariations(updatedVariations);
   };
 

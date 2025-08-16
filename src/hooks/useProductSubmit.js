@@ -6,6 +6,16 @@ import { notifyError, notifySuccess } from "../utils/toast";
 import useAsync from "./useAsync";
 import CategoryServices from "../services/CategoryServices";
 
+// Utility function to get current time in Pakistan timezone
+const getPakistanTime = () => {
+  const now = new Date();
+  // Pakistan is UTC+5, but we need to account for daylight saving time
+  // For now, we'll use a fixed offset. You can adjust this if needed
+  const pakistanOffset = 5 * 60 * 60 * 1000; // 5 hours in milliseconds
+  const pakistanTime = new Date(now.getTime() + pakistanOffset);
+  return pakistanTime.toISOString().slice(0, 19).replace('T', ' ');
+};
+
 const generateProductCode = () => {
   const randomNumber1 = Math.floor(1000000000 + Math.random() * 9000000000); // 10 digit number
   const randomNumber2 = Math.floor(1000 + Math.random() * 9000); // 4 digit number
@@ -150,7 +160,14 @@ const useProductSubmit = (id, type) => {
           setValue("promo_price_usd", res.promo_price_usd);
           setValue("productCode", res.productCode || "");
           setProductCode(res.productCode || "");
-          setVariations(JSON.parse(res.variations) );
+          const loadedVariations = JSON.parse(res.variations);
+          // Ensure all variations have updated_at timestamp in Pakistan timezone
+          const currentDateTime = getPakistanTime();
+          const variationsWithTimestamps = loadedVariations.map(variation => ({
+            ...variation,
+            updated_at: variation.updated_at || currentDateTime
+          }));
+          setVariations(variationsWithTimestamps);
           setTag(JSON.parse(res.tag));
           setImageUrl(res.image ? res.image : res.gallery);
         }
@@ -227,7 +244,14 @@ const useProductSubmit = (id, type) => {
             setValue("promo_price_usd", res.promo_price_usd);
             setValue("productCode", res.productCode || "");
             setValue("user_id", res.user_id); // Add this line to set the vendor
-            setVariations(JSON.parse(res.variations));
+            const loadedVariations = JSON.parse(res.variations);
+            // Ensure all variations have updated_at timestamp in Pakistan timezone
+            const currentDateTime = getPakistanTime();
+            const variationsWithTimestamps = loadedVariations.map(variation => ({
+              ...variation,
+              updated_at: variation.updated_at || currentDateTime
+            }));
+            setVariations(variationsWithTimestamps);
              setProductCode(res.productCode || "");
             setTag(JSON.parse(res.tag));
             // Debug image loading
