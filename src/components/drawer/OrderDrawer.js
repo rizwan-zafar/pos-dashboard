@@ -8,10 +8,62 @@ import ProductServices from "../../services/ProductServices";
 import Title from "../form/Title";
 import LabelArea from "../form/LabelArea";
 
+// Custom scrollbar styles
+const scrollbarStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:active {
+    background: #64748b;
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: #374151;
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    border: 1px solid #4b5563;
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:active {
+    background: #d1d5db;
+  }
+`;
+
 const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
   const [formData, setFormData] = useState({
     userId: "",
-    items: [{ productId: "", quantity: 1, selectedVariation: "", hasVariations: false }],
+    items: [{ 
+      productId: "", 
+      quantity: 1, 
+      selectedVariation: "", 
+      hasVariations: false,
+      productSearch: "",
+      variationSearch: "",
+      showProductDropdown: false,
+      showVariationDropdown: false
+    }],
     paymentMethod: "Cash On Delivery",
     status: "Pending",
     notes: "",
@@ -28,8 +80,91 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
     loadProducts();
   }, []);
 
+  // Handle clicking outside dropdowns to close them
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if click is outside any dropdown container
+      const isOutsideProductDropdown = !event.target.closest('.product-dropdown-container');
+      const isOutsideVariationDropdown = !event.target.closest('.variation-dropdown-container');
+      
+      // Close dropdowns when clicking outside their respective containers
+      setFormData(prev => ({
+        ...prev,
+        items: prev.items.map(item => ({
+          ...item,
+          showProductDropdown: isOutsideProductDropdown ? false : item.showProductDropdown,
+          showVariationDropdown: isOutsideVariationDropdown ? false : item.showVariationDropdown
+        }))
+      }));
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setFormData(prev => ({
+          ...prev,
+          items: prev.items.map(item => ({
+            ...item,
+            showProductDropdown: false,
+            showVariationDropdown: false
+          }))
+        }));
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // Set form data when editing
+  useEffect(() => {
+    if (orderData && isOpen) {
+      setIsEdit(true);
+      setFormData({
+        userId: orderData.userId || "",
+        items: orderData.items || [{ 
+          productId: "", 
+          quantity: 1, 
+          selectedVariation: "", 
+          hasVariations: false,
+          productSearch: "",
+          variationSearch: "",
+          showProductDropdown: false,
+          showVariationDropdown: false
+        }],
+        paymentMethod: orderData.paymentMethod || "Cash On Delivery",
+        status: orderData.status || "Pending",
+        notes: orderData.notes || "",
+      });
+    } else {
+      setIsEdit(false);
+      setFormData({
+        userId: "",
+        items: [{ 
+          productId: "", 
+          quantity: 1, 
+          selectedVariation: "", 
+          hasVariations: false,
+          productSearch: "",
+          variationSearch: "",
+          showProductDropdown: false,
+          showVariationDropdown: false
+        }],
+        paymentMethod: "Cash On Delivery",
+        status: "Pending",
+        notes: "",
+      });
+    }
+  }, [orderData, isOpen]);
+
   const checkProductVariations = (productId) => {
-    const product = products.find(p => p.id === parseInt(productId));
+    console.log("🔍 Checking variations for product ID:", productId, "Type:", typeof productId);
+    const product = products.find(p => p.id === parseInt(productId) || p.id === productId);
+    console.log("🔍 Found product:", product);
     
     if (product && product.variations) {
       let variations;
@@ -38,23 +173,28 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
       if (typeof product.variations === 'string') {
         try {
           variations = JSON.parse(product.variations);
+          console.log("🔍 Parsed variations from JSON:", variations);
         } catch (error) {
+          console.error("🔍 Error parsing variations JSON:", error);
           variations = [];
         }
       } else {
         variations = product.variations;
+        console.log("🔍 Variations (not JSON):", variations);
       }
       
       if (Array.isArray(variations) && variations.length > 0) {
+        console.log("🔍 Product has variations:", variations.length);
         return true;
       }
     }
     
+    console.log("🔍 Product has no variations");
     return false;
   };
 
   const getProductVariations = (productId) => {
-    const product = products.find(p => p.id === parseInt(productId));
+    const product = products.find(p => p.id === parseInt(productId) || p.id === productId);
     if (product && product.variations) {
       let variations;
       
@@ -80,7 +220,7 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
   const getProductPrice = (item) => {
     if (item.selectedVariation && item.hasVariations) {
       // Get price from selected variation
-      const product = products.find(p => p.id === parseInt(item.productId));
+      const product = products.find(p => p.id === parseInt(item.productId) || p.id === item.productId);
       if (product && product.variations) {
         let variations;
         
@@ -105,7 +245,7 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
       }
     } else if (item.productId) {
       // Get price from main product
-      const product = products.find(p => p.id === parseInt(item.productId));
+      const product = products.find(p => p.id === parseInt(item.productId) || p.id === item.productId);
       if (product) {
         return product.price || product.promo_price_pkr || 0;
       }
@@ -165,12 +305,31 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
     if (field === "productId") {
       // When product changes, check if it has variations
       const hasVariations = checkProductVariations(value);
+      const selectedProduct = products.find(p => p.id === parseInt(value) || p.id === value);
+      
+      console.log("🔍 Product selected:", selectedProduct);
+      console.log("🔍 Has variations:", hasVariations);
+      console.log("🔍 Product variations data:", selectedProduct?.variations);
       
       newItems[index] = {
         ...newItems[index],
         productId: value,
         selectedVariation: "", // Reset variation when product changes
-        hasVariations: hasVariations
+        hasVariations: hasVariations,
+        productSearch: selectedProduct ? (selectedProduct.title || selectedProduct.name) : "",
+        variationSearch: "", // Reset variation search
+        showProductDropdown: false, // Close product dropdown
+        showVariationDropdown: false // Close variation dropdown
+      };
+      
+      console.log("🔍 Updated item:", newItems[index]);
+    } else if (field === "selectedVariation") {
+      // When variation changes, update search text
+      newItems[index] = {
+        ...newItems[index],
+        selectedVariation: value,
+        variationSearch: value,
+        showVariationDropdown: false // Close variation dropdown
       };
     } else {
       newItems[index] = {
@@ -188,7 +347,16 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
   const addItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { productId: "", quantity: 1, selectedVariation: "", hasVariations: false }]
+      items: [...prev.items, { 
+        productId: "", 
+        quantity: 1, 
+        selectedVariation: "", 
+        hasVariations: false,
+        productSearch: "",
+        variationSearch: "",
+        showProductDropdown: false,
+        showVariationDropdown: false
+      }]
     }));
   };
 
@@ -205,7 +373,16 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
   const resetForm = () => {
     setFormData({
       userId: "",
-      items: [{ productId: "", quantity: 1, selectedVariation: "", hasVariations: false }],
+      items: [{ 
+        productId: "", 
+        quantity: 1, 
+        selectedVariation: "", 
+        hasVariations: false,
+        productSearch: "",
+        variationSearch: "",
+        showProductDropdown: false,
+        showVariationDropdown: false
+      }],
       paymentMethod: "Cash On Delivery",
       status: "Pending",
       notes: "",
@@ -266,33 +443,11 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
     }
   };
 
-  // Set form data when editing
-  useEffect(() => {
-    if (orderData && isOpen) {
-      setIsEdit(true);
-      setFormData({
-        userId: orderData.userId || "",
-        items: orderData.items || [{ productId: "", quantity: 1, selectedVariation: "", hasVariations: false }],
-        paymentMethod: orderData.paymentMethod || "Cash On Delivery",
-        status: orderData.status || "Pending",
-        notes: orderData.notes || "",
-      });
-    } else {
-      setIsEdit(false);
-      setFormData({
-        userId: "",
-        items: [{ productId: "", quantity: 1, selectedVariation: "", hasVariations: false }],
-        paymentMethod: "Cash On Delivery",
-        status: "Pending",
-        notes: "",
-      });
-    }
-  }, [orderData, isOpen]);
-
   if (!isOpen) return null;
 
   return (
     <>
+      <style>{scrollbarStyles}</style>
       <div className="w-full relative p-6 border-b border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
         <Title
           title={isEdit ? "Update Order" : "Add New Order"}
@@ -399,7 +554,7 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
                   </div>
 
                   {formData.items.map((item, index) => (
-                    <div key={index} className="border-2 border-gray-200 rounded-xl p-6 mb-4 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div key={index} className="border-2 border-gray-200 rounded-xl p-6 mb-4 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-200" data-item-index={index}>
                       <div className="space-y-4">
                         {/* Product and Variation Row */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -410,19 +565,138 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
                               </svg>
                               Product
                             </Label>
-                            <Select
-                              value={item.productId}
-                              onChange={(e) => handleItemChange(index, "productId", e.target.value)}
-                              className="border-2 border-gray-200 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent block w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg transition-all duration-200 pr-8"
-                              required
-                            >
-                              <option value="">Select Product</option>
-                              {products.map((product) => (
-                                <option key={product.id} value={product.id}>
-                                  {product.title || product.name}
-                                </option>
-                              ))}
-                            </Select>
+                            <div className="relative">
+                                <input
+                                  type="text"
+                                  placeholder="Search products..."
+                                  className="border-2 border-gray-200 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg transition-all duration-200 pr-12 pl-3"
+                                  value={item.productSearch || ""}
+                                  onChange={(e) => {
+                                    console.log("Main input onChange:", e.target.value);
+                                    // Update search text directly
+                                    const newItems = [...formData.items];
+                                    newItems[index] = {
+                                      ...newItems[index],
+                                      productSearch: e.target.value
+                                    };
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      items: newItems
+                                    }));
+                                  }}
+                                  onClick={() => {
+                                    // Ensure dropdown stays open when clicking on input
+                                    if (!item.showProductDropdown) {
+                                      handleItemChange(index, "showProductDropdown", true);
+                                    }
+                                  }}
+                                  onFocus={() => {
+                                    console.log("Main input focused");
+                                    // Only open dropdown if it's not already open
+                                    if (!item.showProductDropdown) {
+                                      handleItemChange(index, "showProductDropdown", true);
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    console.log("Main input blurred");
+                                  }}
+                                  style={{ zIndex: 1 }}
+                                  disabled={false}
+                                  readOnly={false}
+                                  autoComplete="off"
+                                />
+                                
+                                {/* Clear Button - Only show when there's text */}
+                                {item.productSearch && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newItems = [...formData.items];
+                                      newItems[index] = {
+                                        ...newItems[index],
+                                        productId: "",
+                                        selectedVariation: "",
+                                        hasVariations: false,
+                                        productSearch: "",
+                                        variationSearch: "",
+                                        showProductDropdown: false,
+                                        showVariationDropdown: false
+                                      };
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        items: newItems
+                                      }));
+                                    }}
+                                    className="absolute inset-y-0 right-3 flex items-center justify-center w-6 h-6 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all duration-200"
+                                    title="Clear selection"
+                                    style={{ zIndex: 2 }}
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                )}
+                              {item.showProductDropdown && (
+                                <div 
+                                  className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-96 overflow-hidden product-dropdown-container"
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                >
+                                  <div 
+                                    className="max-h-96 overflow-y-auto custom-scrollbar" 
+                                    style={{ 
+                                      scrollbarWidth: 'thin', 
+                                      scrollbarColor: '#d1d5db #f3f4f6',
+                                      maxHeight: '384px'
+                                    }}
+                                  >
+                                    {products
+                                      .filter(product => 
+                                        (product.title || product.name || "")
+                                          .toLowerCase()
+                                          .includes((item.productSearch || "").toLowerCase())
+                                      )
+                                      .map((product) => (
+                                        <div
+                                          key={product.id}
+                                          className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-sm border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors duration-150"
+                                          onClick={() => {
+                                            // Update all fields in a single state update
+                                            const newItems = [...formData.items];
+                                            const hasVariations = checkProductVariations(product.id);
+                                            
+                                            newItems[index] = {
+                                              ...newItems[index],
+                                              productId: product.id,
+                                              selectedVariation: "",
+                                              hasVariations: hasVariations,
+                                              productSearch: product.title || product.name,
+                                              variationSearch: "",
+                                              showProductDropdown: false,
+                                              showVariationDropdown: false
+                                            };
+                                            
+                                            setFormData(prev => ({
+                                              ...prev,
+                                              items: newItems
+                                            }));
+                                          }}
+                                        >
+                                          {product.title || product.name}
+                                        </div>
+                                      ))}
+                                    {products.filter(product => 
+                                      (product.title || product.name || "")
+                                        .toLowerCase()
+                                        .includes((item.productSearch || "").toLowerCase())
+                                    ).length === 0 && (
+                                      <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-center">
+                                        No products found
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           <div className="space-y-2">
@@ -453,22 +727,129 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
                                 </svg>
                                 Variation
                               </Label>
-                              <Select
-                                value={item.selectedVariation}
-                                onChange={(e) => handleItemChange(index, "selectedVariation", e.target.value)}
-                                className="border-2 border-gray-200 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent block w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg transition-all duration-200 pr-8"
-                                required
-                              >
-                                <option value="">Select Variation</option>
-                                {getProductVariations(item.productId).map((variation, idx) => (
-                                  <option key={idx} value={variation.size}>
-                                    {variation.size}
-                                  </option>
-                                ))}
-                              </Select>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  placeholder="Search variations..."
+                                  className="border-2 border-gray-200 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 block w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg transition-all duration-200 pr-12 pl-3"
+                                  value={item.variationSearch || ""}
+                                  onChange={(e) => {
+                                    // Update search text directly
+                                    const newItems = [...formData.items];
+                                    newItems[index] = {
+                                      ...newItems[index],
+                                      variationSearch: e.target.value
+                                    };
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      items: newItems
+                                    }));
+                                  }}
+                                  onClick={() => {
+                                    // Ensure dropdown stays open when clicking on input
+                                    if (!item.showVariationDropdown) {
+                                      handleItemChange(index, "showVariationDropdown", true);
+                                    }
+                                  }}
+                                  onFocus={() => {
+                                    // Only open dropdown if it's not already open
+                                    if (!item.showVariationDropdown) {
+                                      handleItemChange(index, "showVariationDropdown", true);
+                                    }
+                                  }}
+                                  style={{ zIndex: 1 }}
+                                  disabled={false}
+                                  readOnly={false}
+                                  autoComplete="off"
+                                />
+                                {/* Search Icon */}
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                  </svg>
+                                </div>
+                                
+                                {/* Clear Button - Only show when there's text */}
+                                {item.variationSearch && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newItems = [...formData.items];
+                                      newItems[index] = {
+                                        ...newItems[index],
+                                        selectedVariation: "",
+                                        variationSearch: "",
+                                        showVariationDropdown: false
+                                      };
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        items: newItems
+                                      }));
+                                    }}
+                                    className="absolute inset-y-0 right-3 flex items-center justify-center w-6 h-6 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all duration-200"
+                                    title="Clear variation"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                )}
+                              {item.showVariationDropdown && (
+                                  <div 
+                                    className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-96 overflow-hidden variation-dropdown-container"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                  >
+                                    <div 
+                                      className="max-h-96 overflow-y-auto custom-scrollbar" 
+                                      style={{ 
+                                        scrollbarWidth: 'thin', 
+                                        scrollbarColor: '#d1d5db #f3f4f6',
+                                        maxHeight: '384px'
+                                      }}
+                                    >
+                                      {getProductVariations(item.productId)
+                                        .filter(variation => 
+                                          variation.size.toLowerCase().includes((item.variationSearch || "").toLowerCase())
+                                        )
+                                        .map((variation, idx) => (
+                                          <div
+                                            key={idx}
+                                            className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-sm border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors duration-150"
+                                            onClick={() => {
+                                              // Update all variation fields in a single state update
+                                              const newItems = [...formData.items];
+                                              newItems[index] = {
+                                                ...newItems[index],
+                                                selectedVariation: variation.size,
+                                                variationSearch: variation.size,
+                                                showVariationDropdown: false
+                                              };
+                                              
+                                              console.log("🔍 Variation selected:", variation.size);
+                                              console.log("🔍 Updated item:", newItems[index]);
+                                              
+                                              setFormData(prev => ({
+                                                ...prev,
+                                                items: newItems
+                                              }));
+                                            }}
+                                          >
+                                            {variation.size}
+                                          </div>
+                                        ))}
+                                      {getProductVariations(item.productId).filter(variation => 
+                                        variation.size.toLowerCase().includes((item.variationSearch || "").toLowerCase())
+                                      ).length === 0 && (
+                                        <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-center">
+                                          No variations found
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-
-                            <div className="flex items-end justify-end">
+                            <div className="flex items-end justify-end"> {/* Remove button in variation row */}
                               <Button
                                 size="small"
                                 onClick={() => removeItem(index)}
@@ -483,6 +864,14 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
                             </div>
                           </div>
                         )}
+
+                        {/* Debug info - Remove this after testing */}
+                        <div className="text-xs text-gray-500 dark:text-gray-400 p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                          Debug: Product ID: {item.productId} | Has Variations: {item.hasVariations ? 'Yes' : 'No'} | 
+                          Variations Count: {item.productId ? getProductVariations(item.productId).length : 0} |
+                          Selected Variation: {item.selectedVariation || 'None'} |
+                          Variation Search: {item.variationSearch || 'Empty'}
+                        </div>
 
                         {/* Remove button row - Only show when no variations */}
                         {!item.hasVariations && (
