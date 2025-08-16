@@ -198,7 +198,7 @@ const useProductSubmit = (id, type) => {
             setVariations(JSON.parse(res.variations));
              setProductCode(res.productCode || "");
             setTag(JSON.parse(res.tag));
-            setImageUrl(res.image ? [res.image] : JSON.parse(res.gallery));
+            setImageUrl(res.image ? [`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${res.image}`] : JSON.parse(res.gallery).map(img => `${process.env.REACT_APP_IMAGE_UPLOAD_URL}${img}`));
             setTitle(res.title);
             setDeliveryCharges(res.delivery);
             setBrand(res.brand);
