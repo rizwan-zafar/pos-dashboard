@@ -51,53 +51,53 @@ const sidebar = [
     icon: FiShoppingBag,
     name: "Purchase",
   },
-  {
-    path: "/reviews",
-    icon: FiShoppingBag,
-    name: "Reviews",
-  },
+  // {
+  //   path: "/reviews",
+  //   icon: FiShoppingBag,
+  //   name: "Reviews",
+  // },
 
   {
     path: "/orders",
     icon: FiCompass,
     name: "Orders",
   },
-  {
-    path: "/messages",
-    icon: FiCompass,
-    name: "Messages",
-  },
+  // {
+  //   path: "/messages",
+  //   icon: FiCompass,
+  //   name: "Messages",
+  // },
 
-  {
-    icon: FiSettings,
-    name: "Setting",
-    routes: [
-      // submenu
-      {
-        path: "/settings/admins",
-        // icon: FiCompass,
-        name: "Admins",
-      },
-      {
-        path: "/settings/app-promotion",
-        name: "App Promotion",
-      },
-      {
-        path: "/settings/banner",
-        name: "Banner ",
-      },
-      {
-        path: "/settings/video-banner",
-        name: "Video Banner ",
-      },
-      {
-        path: "/settings/faq",
-        // icon: FiCompass,
-        name: "Faq",
-      },
+  // {
+  //   icon: FiSettings,
+  //   name: "Setting",
+  //   routes: [
+  //     // submenu
+  //     {
+  //       path: "/settings/admins",
+  //       // icon: FiCompass,
+  //       name: "Admins",
+  //     },
+  //     {
+  //       path: "/settings/app-promotion",
+  //       name: "App Promotion",
+  //     },
+  //     {
+  //       path: "/settings/banner",
+  //       name: "Banner ",
+  //     },
+  //     {
+  //       path: "/settings/video-banner",
+  //       name: "Video Banner ",
+  //     },
+  //     {
+  //       path: "/settings/faq",
+  //       // icon: FiCompass,
+  //       name: "Faq",
+  //     },
       
-    ],
-  },
+  //   ],
+  // },
 ];
 
 export default sidebar;

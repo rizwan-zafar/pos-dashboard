@@ -46,7 +46,7 @@ const UserTable = ({ customers, onEditUser }) => {
             </TableCell>
             <TableCell>
               <div className="flex items-center">
-                {user?.image ? (
+                {user?.image ? ( 
                   <img
                     src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${user.image}`}
                     alt={user.name}

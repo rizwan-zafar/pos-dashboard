@@ -88,33 +88,46 @@ const ProductImgUploader = ({ setImageUrl, imageUrl }) => {
           (Only *.jpeg and *.png images will be accepted)
         </em>
       </div>
-      {imageUrl && Array.isArray(imageUrl) ? (
+      {/* Show existing images */}
+      {imageUrl && Array.isArray(imageUrl) && imageUrl.length > 0 && (
         <aside className="flex flex-row flex-wrap mt-4">
           {imageUrl.map((file, i) => (
-            <div className="relative" key={i}>
+            <div className="relative" key={`existing-${i}`}>
               <IoIosCloseCircle
                 onClick={() => removeImage(i)}
                 className="absolute top-0 text-2xl bg-white text-gray-300 rounded-full cursor-pointer transition-all duration-300 ease-in-out hover:text-gray-400 hover:-translate-y-1"
-              />{" "}
+              />
               <img
-                key={i}
                 className="inline-flex border rounded-md border-gray-100 dark:border-gray-600 w-24 max-h-24 p-2"
-                src={file.replace("5055", "4000")}
+                src={file}
                 alt=""
               />
             </div>
           ))}
         </aside>
-      ) : (
+      )}
+      
+      {/* Show new image previews while uploading */}
+      {files && files.length > 0 && (
+        <aside className="flex flex-row flex-wrap mt-4">
+          {files.map((file, i) => (
+            <div className="relative" key={`new-${i}`}>
+              <img
+                className="inline-flex border rounded-md border-gray-100 dark:border-gray-600 w-24 max-h-24 p-2 opacity-75"
+                src={file.preview}
+                alt=""
+              />
+            </div>
+          ))}
+        </aside>
+      )}
+      
+      {/* Show single image if not array */}
+      {imageUrl && !Array.isArray(imageUrl) && imageUrl && (
         <aside className="flex flex-row flex-wrap mt-4">
           <img
             className="inline-flex border rounded-md border-gray-100 dark:border-gray-600 w-24 max-h-24 p-2"
-            src={
-              imageUrl.startsWith("http")
-                ? imageUrl
-                : `${imageUrl.replace("5055", "4000")}`
-              // : `h/ttp://localhost:5055/upload/${imageUrl}`
-            }
+            src={imageUrl}
             alt=""
           />
         </aside>

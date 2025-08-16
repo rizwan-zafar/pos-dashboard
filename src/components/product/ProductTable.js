@@ -65,12 +65,31 @@ const ProductTable = ({ products }) => {
                     crossOrigin="anonymous"
                   />
                 ) : product.gallery && product.gallery !== "[]" ? (
-                  <img
-                    src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${JSON.parse(product.gallery)[0]}`}
-                    alt={product.title}
-                    className="w-10 h-10 rounded object-cover mr-2"
-                    crossOrigin="anonymous"
-                  />
+                  <React.Fragment>
+                    {console.log("images gallery", product.id,product.gallery)}
+                    <img
+                      src={`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${(() => {
+                        try {
+                          const galleryArray = JSON.parse(product.gallery);
+                          return galleryArray.length > 0 ? galleryArray[0] : null;
+                        } catch (error) {
+                          return null;
+                        }
+                      })()}`}
+                      alt={product.title}
+                      className="w-10 h-10 rounded object-cover mr-2"
+                      crossOrigin="anonymous"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div className="hidden w-10 h-10 rounded bg-gray-200 flex items-center justify-center mr-2">
+                      <span className="text-gray-500 text-sm font-semibold">
+                        {product?.title?.charAt(0)?.toUpperCase() || "P"}
+                      </span>
+                    </div>
+                  </React.Fragment>
                 ) : (
                   <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center mr-2">
                     <span className="text-gray-500 text-sm font-semibold">

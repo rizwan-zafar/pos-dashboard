@@ -54,6 +54,38 @@ const useProductSubmit = (id, type) => {
     }
 
     // console.log('imageUrl', imageUrl);
+    // Extract filenames from URLs (handles both full URLs and relative URLs)
+    const imageFilenames = imageUrl.map(img => {
+      // Handle relative URLs like "/upload/filename.webp"
+      if (img.startsWith('/upload/')) {
+        return img.replace('/upload/', '');
+      }
+      // Handle full URLs like "http://localhost:5055/upload/filename.webp"
+      else if (img.includes(process.env.REACT_APP_IMAGE_UPLOAD_URL)) {
+        return img.replace(process.env.REACT_APP_IMAGE_UPLOAD_URL, '');
+      }
+      // Handle legacy full URLs
+      else if (img.includes('http://localhost:5055/upload/')) {
+        return img.replace('http://localhost:5055/upload/', '');
+      }
+      // Already a filename
+      else {
+        return img;
+      }
+    });
+    
+    console.log("Original imageUrl:", imageUrl);
+    console.log("Extracted filenames:", imageFilenames);
+    
+    // For updates, use current imageUrl as the new gallery (user may have removed images)
+    let finalGallery = imageFilenames;
+    if (id) {
+      // When editing, just use the current imageUrl as the new gallery
+      // This handles cases where user removed images using cross icon
+      finalGallery = imageFilenames;
+      console.log("Update mode - using current imageUrl as new gallery:", finalGallery);
+    }
+    
     const productData = {
       title: formData.title,
       delivery: parseInt(formData.deliveryCharges),
@@ -66,8 +98,8 @@ const useProductSubmit = (id, type) => {
       price_usd: formData.price_usd,
       promo_price_usd: formData.promo_price_usd,
       productCode: formData.productCode ||  "",
-      gallery: imageUrl.length > 1 ? JSON.stringify(imageUrl) : "[]",
-      image: imageUrl.length === 1 ? imageUrl[0] : "",
+      gallery: finalGallery.length > 1 ? JSON.stringify(finalGallery) : "[]",
+      image: finalGallery.length === 1 ? finalGallery[0] : "",
       tag: JSON.stringify(tag),
       stock: formData.stock,
       category_id: result.id,
@@ -198,7 +230,34 @@ const useProductSubmit = (id, type) => {
             setVariations(JSON.parse(res.variations));
              setProductCode(res.productCode || "");
             setTag(JSON.parse(res.tag));
-            setImageUrl(res.image ? [`${process.env.REACT_APP_IMAGE_UPLOAD_URL}${res.image}`] : JSON.parse(res.gallery).map(img => `${process.env.REACT_APP_IMAGE_UPLOAD_URL}${img}`));
+            // Debug image loading
+            console.log("Product data for editing:", res);
+            console.log("Image field:", res.image);
+            console.log("Gallery field:", res.gallery);
+            console.log("Environment variable:", process.env.REACT_APP_IMAGE_UPLOAD_URL);
+            
+            if (res.image && res.image !== "") {
+              // Use relative URL to avoid CORS issues
+              const imageUrl = `/upload/${res.image}`;
+              console.log("Setting single image URL:", imageUrl);
+              setImageUrl([imageUrl]);
+            } else if (res.gallery && res.gallery !== "[]") {
+              try {
+                const galleryArray = JSON.parse(res.gallery);
+                // Use relative URLs to avoid CORS issues
+                const galleryUrls = galleryArray.map(img => `/upload/${img}`);
+                console.log("Setting gallery URLs:", galleryUrls);
+                setImageUrl(galleryUrls);
+              } catch (error) {
+                console.error("Error parsing gallery:", error);
+                setImageUrl([]);
+              }
+            } else {
+              console.log("No images found, setting empty array");
+              setImageUrl([]);
+            }
+            // Store existing gallery for merging during update
+            setValue("existingGallery", res.gallery || "[]");
             setTitle(res.title);
             setDeliveryCharges(res.delivery);
             setBrand(res.brand);
