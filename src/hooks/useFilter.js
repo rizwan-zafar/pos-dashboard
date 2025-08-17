@@ -152,25 +152,25 @@ const useFilter = (data) => {
         services = services.filter((product) => 
           product && product.category && product.category.toLowerCase() === categoryType.toLowerCase()
         );
-      }
+    }
 
       // Child category filtering
       if (childCategory) {
         services = services.filter((product) => 
           product && product.childCategory && product.childCategory.toLowerCase() === childCategory.toLowerCase()
         );
-      }
+    }
 
       // Product search
-      if (searchText) {
+    if (searchText) {
         services = services.filter((product) => 
           product && (
             (product.title && product.title.toLowerCase().includes(searchText.toLowerCase())) ||
             (product.productCode && product.productCode.toLowerCase().includes(searchText.toLowerCase())) ||
             (product.name && product.name.toLowerCase().includes(searchText.toLowerCase()))
           )
-        );
-      }
+      );
+    }
     }
 
 

@@ -27,7 +27,7 @@ const SidebarContent = () => {
         ) : (
           <div className="flex items-center justify-start ml-5">
             <img src={logoDark}  alt="dashtar" width="40"  />
-            <h1 className="text-2xl font-bold">SARDARSTORE</h1>
+            <h1 className="text-2xl font-bold">-</h1>
             
           </div>
         )}

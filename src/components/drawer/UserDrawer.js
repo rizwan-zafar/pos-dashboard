@@ -159,7 +159,7 @@ const UserDrawer = ({ id }) => {
                   placeholder="Enter STRN (optional)"
                   className="border h-12 text-sm focus:outline-none block w-full bg-gray-100 dark:bg-white border-transparent focus:bg-white"
                   {...register("strn")}
-                /> 
+                />
               </div>
             </div>
 

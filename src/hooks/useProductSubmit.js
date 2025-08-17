@@ -242,7 +242,7 @@ const useProductSubmit = (id, type) => {
             setValue("price_usd", res.price_usd);
             setValue("promo_price_pkr", res.promo_price_pkr);
             setValue("promo_price_usd", res.promo_price_usd);
-            setValue("productCode", res.productCode || "");
+             setValue("productCode", res.productCode || "");
             setValue("user_id", res.user_id); // Add this line to set the vendor
             const loadedVariations = JSON.parse(res.variations);
             // Ensure all variations have updated_at timestamp in Pakistan timezone

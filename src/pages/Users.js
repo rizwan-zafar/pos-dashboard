@@ -136,16 +136,16 @@ const Users = () => {
 
             {/* Clear Filters Button */}
             <div className="flex justify-center sm:justify-start">
-              <div
-                onClick={handleClearFilters}
+            <div
+              onClick={handleClearFilters}
                 className={`cursor-pointer flex items-center justify-center p-3 rounded-full h-12 w-12 text-center transition-all duration-200 ${
                   (searchUser || role) 
                     ? 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/40' 
                     : 'text-blue-600 dark:text-blue-100 bg-blue-100 dark:bg-blue-500'
                 }`}
                 title="Clear all filters"
-              >
-                <FaFilterCircleXmark />
+            >
+              <FaFilterCircleXmark />
               </div>
             </div>
 

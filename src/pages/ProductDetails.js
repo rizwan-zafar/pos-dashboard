@@ -45,7 +45,7 @@ const ProductDetails = () => {
   console.log("ProductDetails - Complete API Response:", data);
   console.log("ProductDetails - Data type:", typeof data);
   console.log("ProductDetails - Data keys:", data ? Object.keys(data) : 'No data');
-  
+
   const [variations, setVariations] = useState([]);
   const [lowestPriceVariation, setLowestPriceVariation] = useState(null);
 
@@ -198,8 +198,8 @@ const ProductDetails = () => {
                                       </div>
                                     ))}
                                   </div>
-                                )}
-                              </div>
+              )}
+            </div>
                             );
                           }
                         } catch (error) {
@@ -317,7 +317,7 @@ const ProductDetails = () => {
                               </svg>
                               <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                                 Rs {productData.delivery}
-                              </span>
+                </span>
                             </div>
                           ) : (
                             <div className="flex items-center justify-center space-x-2">
@@ -451,8 +451,8 @@ const ProductDetails = () => {
                               return null;
                             })()}
                           </div>
-                        </div>
-                        
+              </div>
+
                         <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
@@ -464,7 +464,7 @@ const ProductDetails = () => {
                           </div>
                           <span className="font-semibold text-gray-900 dark:text-white text-sm">
                             {productData?.updatedAt ? formatDateTime(productData.updatedAt) : "N/A"}
-                          </span>
+                        </span>
                         </div>
                       </div>
                     </div>
@@ -536,12 +536,12 @@ const ProductDetails = () => {
                           <td className="py-4 px-4">
                             <Badge type={variation.stock > 0 ? "success" : "danger"}>
                               {variation.stock > 0 ? "In Stock" : "Out of Stock"}
-                            </Badge>
+                  </Badge>
                           </td>
                           <td className="py-4 px-4">
                             <span className="text-sm text-gray-600 dark:text-gray-400 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
                               {formatDateTime(variation.updated_at)}
-                            </span>
+                </span>
                           </td>
                         </tr>
                       ))}
@@ -630,7 +630,7 @@ const ProductDetails = () => {
                   </svg>
                 </div>
               </div>
-              
+
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-amber-200 dark:border-amber-700 p-4">
                 <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
                   <p className="leading-relaxed text-sm sm:text-base">{productData?.description || "No description available."}</p>
