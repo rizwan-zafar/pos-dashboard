@@ -367,15 +367,30 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
 
     setLoading(true);
     try {
+      // Clean up items to only include essential data for API
+      const cleanItems = formData.items.filter(item => item.productId).map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: getProductPrice(item),
+        selectedVariation: item.selectedVariation || null
+      }));
+
       const orderPayload = {
-        ...formData,
+        userId: formData.userId,
+        paymentMethod: formData.paymentMethod,
+        status: formData.status,
         totalPrice: calculateTotalPrice(),
-        items: formData.items.filter(item => item.productId),
+        items: JSON.stringify(cleanItems),
+        notes: formData.notes || "",
         // Receiver details will be populated from selected customer data
         reciever_name: users.find(u => u.id === parseInt(formData.userId))?.name || "",
         reciever_address: users.find(u => u.id === parseInt(formData.userId))?.address || "",
         reciever_contact: users.find(u => u.id === parseInt(formData.userId))?.phone || "",
       };
+
+      // Debug: Log the payload being sent
+      console.log("🔍 Clean Items:", cleanItems);
+      console.log("🔍 Order Payload being sent:", orderPayload);
 
       let response;
       if (isEdit) {

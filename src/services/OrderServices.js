@@ -57,7 +57,7 @@ const OrderServices = {
   },
 
   createOrder(orderData) {
-    return requests.post(`/orders`, orderData);
+    return requests.post(`/order/add`, orderData);
   },
 };
 
