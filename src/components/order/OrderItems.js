@@ -9,7 +9,9 @@ const OrderItems = ({
   onRemoveItem,
   checkProductVariations,
   getProductVariations,
-  getProductPrice
+  getProductPrice,
+  getProductStock,
+  validateQuantity
 }) => {
   return (
     <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
@@ -162,23 +164,52 @@ const OrderItems = ({
                     <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
-                    Quantityyy
+                    Quantity
                   </Label>
                   <Input
                     type="number"
                     min="1"
+                    max={item.productId ? getProductStock(item) : 999}
                     value={item.quantity}
                     onChange={(e) => {
+                      const newQuantity = parseInt(e.target.value) || 1;
+                      const availableStock = getProductStock(item);
+                      
+                      // Validate quantity against available stock
+                      if (newQuantity > availableStock) {
+                        // Don't allow exceeding stock
+                        return;
+                      }
+                      
                       const newItems = [...formData.items];
                       newItems[index] = {
                         ...newItems[index],
-                        quantity: parseInt(e.target.value)
+                        quantity: newQuantity
                       };
                       onItemChange("items", newItems);
                     }}
-                    className="border-2 border-gray-200 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent block w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg transition-all duration-200"
+                    className={`border-2 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent block w-full rounded-lg transition-all duration-200 ${
+                      item.productId && item.quantity > getProductStock(item)
+                        ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                        : 'border-gray-200 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white'
+                    }`}
                     required
                   />
+                  {/* Stock information */}
+                  {item.productId && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.hasVariations && !item.selectedVariation ? (
+                        <span>Total Variations Stock: {getProductStock(item)} units</span>
+                      ) : item.hasVariations && item.selectedVariation ? (
+                        <span>Selected Variation Stock: {getProductStock(item)} units</span>
+                      ) : (
+                        <span>Available: {getProductStock(item)} units</span>
+                      )}
+                      {item.quantity > getProductStock(item) && (
+                        <span className="text-red-500 ml-2">⚠️ Exceeds available stock</span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

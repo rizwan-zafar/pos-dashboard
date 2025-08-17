@@ -82,6 +82,13 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
     loadProducts();
   }, []);
 
+  // Refresh products data when drawer opens to get latest stock
+  useEffect(() => {
+    if (isOpen) {
+      loadProducts();
+    }
+  }, [isOpen]);
+
   // Handle clicking outside dropdowns to close them
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -235,7 +242,8 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
         if (Array.isArray(variations)) {
           const variation = variations.find(v => v.size === item.selectedVariation);
           if (variation) {
-            const price = variation.price || variation.promo_price_pkr || 0;
+            // Priority: promo_price_pkr first, then price, then 0
+            const price = variation.promo_price_pkr || variation.price || 0;
             return typeof price === 'number' ? price : parseFloat(price) || 0;
           }
         }
@@ -244,11 +252,131 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
       // Get price from main product
       const product = products.find(p => p.id === parseInt(item.productId) || p.id === item.productId);
       if (product) {
-        const price = product.price || product.promo_price_pkr || 0;
+        // Priority: promo_price_pkr first, then price, then 0
+        const price = product.promo_price_pkr || product.price || 0;
         return typeof price === 'number' ? price : parseFloat(price) || 0;
       }
     }
     return 0;
+  };
+
+  const getProductStock = (item) => {
+    if (item.selectedVariation && item.hasVariations) {
+      // Get stock from selected variation
+      const product = products.find(p => p.id === parseInt(item.productId) || p.id === item.productId);
+      if (product && product.variations) {
+        let variations;
+        
+        // Parse variations if it's a JSON string
+        if (typeof product.variations === 'string') {
+          try {
+            variations = JSON.parse(product.variations);
+          } catch (error) {
+            console.error("🔍 Error parsing variations JSON:", error);
+            variations = [];
+          }
+        } else {
+          variations = product.variations;
+        }
+        
+        if (Array.isArray(variations)) {
+          const variation = variations.find(v => v.size === item.selectedVariation);
+          if (variation) {
+            return parseInt(variation.stock) || 0;
+          }
+        }
+      }
+    } else if (item.productId) {
+      // Get stock from main product or total variations stock
+      const product = products.find(p => p.id === parseInt(item.productId) || p.id === item.productId);
+      if (product) {
+        if (item.hasVariations && product.variations) {
+          // Calculate total stock from all variations
+          let variations;
+          if (typeof product.variations === 'string') {
+            try {
+              variations = JSON.parse(product.variations);
+            } catch (error) {
+              console.error("🔍 Error parsing variations JSON:", error);
+              variations = [];
+            }
+          } else {
+            variations = product.variations;
+          }
+          
+          if (Array.isArray(variations)) {
+            const totalStock = variations.reduce((sum, variation) => {
+              return sum + (parseInt(variation.stock) || 0);
+            }, 0);
+            return totalStock;
+          }
+        } else {
+          // Regular product without variations
+          return parseInt(product.stock) || 0;
+        }
+      }
+    }
+    return 0;
+  };
+
+  const validateQuantity = (item, newQuantity) => {
+    const availableStock = getProductStock(item);
+    return newQuantity <= availableStock;
+  };
+
+  const updateProductStock = (orderItems) => {
+    // Update local products stock after order creation
+    const updatedProducts = products.map(product => {
+      const orderItem = orderItems.find(item => 
+        item.productId === product.id || item.productId === product.id.toString()
+      );
+      
+      if (orderItem) {
+        if (orderItem.selectedVariation && product.variations) {
+          // Update variation stock
+          let variations;
+          if (typeof product.variations === 'string') {
+            try {
+              variations = JSON.parse(product.variations);
+            } catch (error) {
+              variations = [];
+            }
+          } else {
+            variations = product.variations;
+          }
+          
+          const updatedVariations = variations.map(variation => {
+            if (variation.size === orderItem.selectedVariation) {
+              const currentStock = parseInt(variation.stock) || 0;
+              const orderedQuantity = parseInt(orderItem.quantity) || 0;
+              return {
+                ...variation,
+                stock: Math.max(0, currentStock - orderedQuantity).toString()
+              };
+            }
+            return variation;
+          });
+          
+          return {
+            ...product,
+            variations: typeof product.variations === 'string' 
+              ? JSON.stringify(updatedVariations)
+              : updatedVariations
+          };
+        } else {
+          // Update main product stock
+          const currentStock = parseInt(product.stock) || 0;
+          const orderedQuantity = parseInt(orderItem.quantity) || 0;
+          return {
+            ...product,
+            stock: Math.max(0, currentStock - orderedQuantity)
+          };
+        }
+      }
+      return product;
+    });
+    
+    setProducts(updatedProducts);
   };
 
   const calculateTotalPrice = () => {
@@ -346,6 +474,7 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     
     if (!formData.userId) {
       notifyError("Please select a customer");
@@ -362,6 +491,17 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
       if (item.productId && item.hasVariations && !item.selectedVariation) {
         notifyError("Please select a variation for products that have variations");
         return;
+      }
+    }
+
+    // Validate stock availability
+    for (let item of formData.items) {
+      if (item.productId) {
+        const availableStock = getProductStock(item);
+        if (item.quantity > availableStock) {
+          notifyError(`Insufficient stock for product. Available: ${availableStock}, Requested: ${item.quantity}`);
+          return;
+        }
       }
     }
 
@@ -402,12 +542,19 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
       }
 
       if (response) {
-        onSuccess();
-        // Auto-reset form after successful order creation
+        // Update product stock after successful order creation
         if (!isEdit) {
+          updateProductStock(cleanItems);
           resetForm();
         }
-        onClose();
+        // Call onSuccess callback if provided, passing the response data
+        if (onSuccess && typeof onSuccess === 'function') {
+          onSuccess(response);
+        }
+        // Close the drawer
+        if (onClose && typeof onClose === 'function') {
+          onClose();
+        }
       }
     } catch (error) {
       console.error("Error saving order:", error);
@@ -430,7 +577,7 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
       </div>
 
       <Scrollbars className="w-full md:w-7/12 lg:w-8/12 xl:w-8/12 relative dark:bg-gray-700 dark:text-gray-200">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="p-6 flex-grow scrollbar-hide w-full max-h-full pb-40">
             <div className="space-y-6">
               {/* User Selection */}
@@ -518,6 +665,8 @@ const OrderDrawer = ({ isOpen, onClose, orderData = null, onSuccess }) => {
                 checkProductVariations={checkProductVariations}
                 getProductVariations={getProductVariations}
                 getProductPrice={getProductPrice}
+                getProductStock={getProductStock}
+                validateQuantity={validateQuantity}
               />
 
               {/* Order Summary */}

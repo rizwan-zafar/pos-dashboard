@@ -42,7 +42,7 @@ const Orders = () => {
     day: time,
   });
 
-  const { data, loading } = useAsync(() =>
+  const { data, loading, refetch } = useAsync(() =>
     OrderServices.getAllOrders({
       contact: searchText,
       status,
@@ -51,6 +51,36 @@ const Orders = () => {
       day: time,
     })
   );
+
+  // Local state for orders to ensure immediate updates
+  const [localOrders, setLocalOrders] = useState([]);
+
+  // Update local orders when API data changes
+  React.useEffect(() => {
+    if (data?.orders) {
+      setLocalOrders(data.orders);
+    }
+  }, [data?.orders]);
+
+  // Manual refresh function as backup
+  const manualRefresh = async () => {
+    console.log("🔍 Manual refresh triggered");
+    try {
+      const newData = await OrderServices.getAllOrders({
+        contact: searchText,
+        status,
+        page: currentPage,
+        limit: 8,
+        day: time,
+      });
+      console.log("🔍 Manual refresh successful:", newData);
+      if (newData?.orders) {
+        setLocalOrders(newData.orders);
+      }
+    } catch (error) {
+      console.error("🔍 Manual refresh failed:", error);
+    }
+  };
 
   // Debug: Log the API response
   console.log("🔍 Orders.js - API Response:", {
@@ -70,7 +100,7 @@ const Orders = () => {
   });
 
   // Simple orders handling - bypass useFilter complexity
-  const orders = data?.orders || [];
+  const orders = localOrders || [];
   const [currentOrdersPage, setCurrentOrdersPage] = useState(1);
   const [orderType, setOrderType] = useState("");
   const ordersPerPage = 8;
@@ -105,9 +135,56 @@ const Orders = () => {
     setSelectedOrder(null);
   };
 
-  const handleOrderSuccess = () => {
-    // Refresh orders data
-    window.location.reload();
+  const handleOrderSuccess = async (newOrderData = null) => {
+    console.log("🔍 handleOrderSuccess called - refreshing orders data");
+    
+    // If we have new order data, add it to local state immediately
+    if (newOrderData) {
+      console.log("🔍 Adding new order to local state:", newOrderData);
+      
+      // Ensure the new order has the proper structure that OrderTable expects
+      const structuredOrder = {
+        ...newOrderData,
+        // Ensure user object exists with required properties
+        user: {
+          phone: newOrderData.reciever_contact || newOrderData.user?.phone || "N/A",
+          email: newOrderData.user?.email || "N/A",
+          name: newOrderData.reciever_name || newOrderData.user?.name || "N/A"
+        },
+        // Ensure items array exists and has proper structure
+        items: newOrderData.items ? 
+          (typeof newOrderData.items === 'string' ? JSON.parse(newOrderData.items) : newOrderData.items)
+          : [],
+        // Ensure other required properties
+        totalPrice: newOrderData.totalPrice || 0,
+        status: newOrderData.status || "Pending"
+      };
+      
+      console.log("🔍 Structured order for local state:", structuredOrder);
+      setLocalOrders(prevOrders => [structuredOrder, ...prevOrders]);
+    }
+    
+    // Try refetch first
+    if (refetch) {
+      try {
+        console.log("🔍 Calling refetch()...");
+        await refetch();
+        console.log("🔍 refetch() completed successfully");
+        
+        // Also try manual refresh as backup
+        setTimeout(() => {
+          manualRefresh();
+        }, 500);
+        
+      } catch (error) {
+        console.error("🔍 Error during refetch:", error);
+        // Fallback: use manual refresh
+        manualRefresh();
+      }
+    } else {
+      console.log("🔍 refetch function not available, using manual refresh");
+      manualRefresh();
+    }
   };
 
   // Debug: Log simple orders handling

@@ -211,7 +211,7 @@ const ProductDrawer = ({ id }) => {
                 <InputValue register={register}
                   // maxValue={2000}
                   minValue={1}
-                  label="price ($)"
+                  label="price"
                   name="price"
                   type="number"
                   // {...register("price", {
@@ -240,6 +240,41 @@ const ProductDrawer = ({ id }) => {
               </div>
             </div>
 
+
+            <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
+              <LabelArea label="Promo Price" />
+              <div className="col-span-8 sm:col-span-4">
+                <InputValue register={register}
+                  // maxValue={2000}
+                  minValue={1}
+                  label="promo price"
+                  name="promo_price_pkr"
+                  type="number"
+                  // {...register("price", {
+                  //   required: "Price in PKR is required!",
+                  // })}
+                  {...register("promo_price_pkr",
+                    variations.length === 0
+                      ? { required: "Price in PKR is required!" }
+                      : {}
+                  )}
+                  placeholder="Promo"
+                  required={
+                    variations.length > 0
+                  }
+                  disable={
+                    variations.length > 0
+                  }
+                  value={
+                    watch("promo_price_pkr") || ""
+                  }
+                // Ensure it's never null
+                />
+                <Error errorName={
+                  errors.price
+                } />
+              </div>
+            </div>
             {/* Variations Section */}
             <div className="mb-6">
               <LabelArea label="Variations" />
@@ -305,20 +340,20 @@ const ProductDrawer = ({ id }) => {
               </div>
             </div>
 
-            {/* <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
-              <LabelArea label="Delivery Chargessss" />
+            <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
+              <LabelArea label="Delivery Charges" />
               <div className="col-span-8 sm:col-span-4">
                 <InputArea register={register}
                   label="Delivery charges"
                   name="deliveryCharges"
-                  minValue={1}
+                  minValue={0}
                   type="number"
                   placeholder="Enter Delivery Charges" />
                 <Error errorName={
                   errors.deliveryCharges
                 } />
               </div>
-            </div> */}
+            </div>
             <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
               <LabelArea label="Vendor" />
               <div className="col-span-8 sm:col-span-4">

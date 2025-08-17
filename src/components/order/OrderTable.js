@@ -28,12 +28,12 @@ const OrderTable = ({ orders }) => {
           
 
             <TableCell>
-              {order?.items?.length > 0 ? (
+              {order?.items && Array.isArray(order.items) && order.items.length > 0 ? (
                 <div className="relative">
                   <select className="block w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring focus:ring-blue-500 appearance-none">
                     {order.items.map((item, i) => (
                       <option key={i}>
-                        {item?.productDetails?.title || "Unnamed Product"}
+                        {item?.productDetails?.title || item?.productId || "Unnamed Product"}
                       </option>
                     ))}
                   </select>
@@ -53,10 +53,10 @@ const OrderTable = ({ orders }) => {
             </TableCell>
 
             <TableCell>
-              <span className="text-sm"> {order.user.phone}</span>
+              <span className="text-sm"> {order?.user?.phone || "N/A"}</span>
             </TableCell>
             <TableCell>
-              <span className="text-sm"> {order.user.email}</span>
+              <span className="text-sm"> {order?.user?.email || "N/A"}</span>
             </TableCell>
 
             <TableCell className="text-center text-xs">
